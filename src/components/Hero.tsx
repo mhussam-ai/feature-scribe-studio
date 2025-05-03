@@ -17,17 +17,17 @@ const Hero = () => {
           <div className="flex flex-col space-y-8">
             <div>
               <span className="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
-                New Platform for Startups
+                Accelerate Startup growth with AI powered demos
               </span>
             </div>
             
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight">
-              Turn UI Videos into <span className="text-blue-600">Detailed Documentation</span>
+              Turn UI Videos into <span className="text-blue-600">Custom Collaterals</span>
             </h1>
             
             <p className="text-lg text-gray-600 max-w-lg">
               Upload your UI tutorial videos and screenshots. Our AI instantly converts them into 
-              comprehensive documentation for your new features and interfaces.
+              comprehensive documentation and customer decks, dynamically syncing with your new features and interfaces.
             </p>
             
             <div className="flex flex-wrap gap-4">
@@ -37,7 +37,9 @@ const Hero = () => {
                 </a>
               </Button>
               <Button variant="outline" className="text-base">
+              <a href="#how-it-works">
                 Watch Demo
+                </a>
               </Button>
               <Button variant="secondary" className="text-base flex items-center gap-2">
                 <Chrome className="w-5 h-5" /> Chrome Extension
@@ -56,7 +58,7 @@ const Hero = () => {
                   <span className="text-xs font-medium text-purple-800">TM</span>
                 </div>
               </div>
-              <p>Join <span className="font-medium">200+</span> startups already using AdaptiDemo Labs</p>
+              <p>Join <span className="font-medium">x+</span> startups already using AdaptiDemo Labs</p>
             </div>
           </div>
           

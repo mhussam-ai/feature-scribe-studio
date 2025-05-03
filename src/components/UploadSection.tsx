@@ -181,9 +181,9 @@ const UploadSection = () => {
     <section id="upload" className="py-16 bg-gray-50">
       <div className="container-custom">
         <div className="text-center mb-10">
-          <h2 className="text-3xl font-bold mb-4">Start Creating Documentation Now</h2>
+          <h2 className="text-3xl font-bold mb-4">Start Creating Collaterals Now</h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Upload your UI videos or screenshots and get detailed documentation in minutes
+            Upload your UI videos or screenshots and get detailed collaterals in minutes
           </p>
         </div>
 
@@ -203,12 +203,12 @@ const UploadSection = () => {
                   <span className="font-medium text-lg text-gray-700">Build a User Guide</span>
                   <RadioGroupItem value="user guide" id="r1" className="shrink-0" />
                 </div>
-                <p className="text-sm text-gray-500 text-center w-full">Generate detailed step-by-step instructions and guides.</p>
+                <p className="text-sm text-gray-500 text-center w-full">Generate detailed step-by-step documentation and guides.</p>
               </Label>
               {/* Deck Option - Corrected Label structure */}
               <Label htmlFor="r2" className={`flex flex-col items-center p-6 border rounded-lg cursor-pointer transition-all ${buildTarget === 'deck' ? 'bg-blue-50 border-blue-300 ring-2 ring-blue-200' : 'hover:bg-gray-50 border-gray-200'}`}>
                 <div className="flex items-center w-full justify-between mb-2">
-                  <span className="font-medium text-lg text-gray-700">Build a Deck</span>
+                  <span className="font-medium text-lg text-gray-700">Build a Customer Deck</span>
                   <RadioGroupItem value="deck" id="r2" className="shrink-0" />
                 </div>
                 <p className="text-sm text-gray-500 text-center w-full">Create presentation slides summarizing key features or flows.</p>
@@ -456,7 +456,7 @@ const UploadSection = () => {
                   <span className="font-semibold text-blue-600">3</span>
                 </div>
                 <div>
-                  <h4 className="font-medium">Documentation Generation</h4>
+                  <h4 className="font-medium">Collateral Generation</h4>
                   <p className="text-gray-600">
                     Receive complete, customizable, and exportable documentation ready to share
                   </p>

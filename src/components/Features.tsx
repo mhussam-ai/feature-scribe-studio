@@ -39,9 +39,9 @@ const features = [
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
       </svg>
     ),
-    title: "Customizable Templates",
+    title: "Personalized Outputs",
     description:
-      "Choose from various documentation templates or create your own custom templates to match your brand identity.",
+      "Our AI automatically creates personalized documentation and decks with relevant features for the persona you choose.",
   },
   {
     icon: (
@@ -71,11 +71,11 @@ const Features = () => {
       <div className="container-custom">
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-            Every Feature You Need to Create Amazing Documentation
+            We Built Every Feature You Need to Create Custom Collaterals
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Save hours of manual documentation work with our AI-powered platform
-            designed specifically for startup product teams.
+            Save hours spent in manually updating documentation and customer deck with our AI-powered platform
+            designed specifically for quick iterating startups.
           </p>
         </div>
 
@@ -102,7 +102,7 @@ const Features = () => {
               </h3>
               <ul className="space-y-3">
                 {[
-                  "Save 80% of the time spent on creating documentation",
+                  "Save 80% of the time spent on updating collaterals",
                   "Improve user onboarding with clear feature guides",
                   "Keep documentation in sync with your latest UI changes",
                   "Eliminate the need for technical writers",

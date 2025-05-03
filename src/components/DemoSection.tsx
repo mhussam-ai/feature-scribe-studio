@@ -8,7 +8,7 @@ const DemoSection = () => {
           <h2 className="text-3xl font-bold mb-4">See How AdaptiDemo Works</h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Watch our demo to see how quickly you can turn your UI videos into
-            comprehensive documentation
+            comprehensive collaterals like documentation and customer decks
           </p>
         </div>
 
@@ -34,17 +34,17 @@ const DemoSection = () => {
 
         <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="bg-gray-50 rounded-xl p-6">
-            <div className="text-blue-600 text-5xl font-bold mb-4">93%</div>
+            <div className="text-blue-600 text-5xl font-bold mb-4">x%</div>
             <p className="text-gray-800">Reduction in documentation time for new features</p>
           </div>
           
           <div className="bg-gray-50 rounded-xl p-6">
-            <div className="text-blue-600 text-5xl font-bold mb-4">200+</div>
-            <p className="text-gray-800">Startups using AdaptiDemo for their documentation</p>
+            <div className="text-blue-600 text-5xl font-bold mb-4">x%</div>
+            <p className="text-gray-800">Uptick in lead conversion funnel</p>
           </div>
           
           <div className="bg-gray-50 rounded-xl p-6">
-            <div className="text-blue-600 text-5xl font-bold mb-4">65%</div>
+            <div className="text-blue-600 text-5xl font-bold mb-4">x%</div>
             <p className="text-gray-800">Improvement in customer onboarding success</p>
           </div>
         </div>
