@@ -40,7 +40,7 @@ const DemoSection = () => {
           
           <div className="bg-gray-50 rounded-xl p-6">
             <div className="text-blue-600 text-5xl font-bold mb-4">200+</div>
-            <p className="text-gray-800">Startups using FeatureScribe for their documentation</p>
+            <p className="text-gray-800">Startups using AdaptiDemo for their documentation</p>
           </div>
           
           <div className="bg-gray-50 rounded-xl p-6">

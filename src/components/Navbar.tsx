@@ -42,12 +42,6 @@ const Navbar = () => {
           <Link to="/dashboard" className="font-medium hover:text-blue-600 transition-colors">
             Dashboard
           </Link>
-          <Link to="/#features" className="font-medium hover:text-blue-600 transition-colors">
-            Features
-          </Link>
-          <Link to="/#how-it-works" className="font-medium hover:text-blue-600 transition-colors">
-            How It Works
-          </Link>
           <Link to="/launching-soon" className="font-medium hover:text-blue-600 transition-colors">
             Launching Soon
           </Link>
