@@ -75,3 +75,16 @@ export const checkStatus = async (videoId: string): Promise<StatusResponse> => {
 export const getDocumentDownloadUrl = (videoId: string): string => {
   return `${API_BASE_URL}/download/${videoId}`;
 };
+
+export const getMarkdownFileUrl = (videoId: string, filePath: string): string => {
+  return `${API_BASE_URL}/docs/${videoId}/${filePath}`;
+};
+
+export const listDocsDirectory = async (videoId: string, dirPath: string = ""): Promise<any[]> => {
+  const url = `${API_BASE_URL}/docs-list/${videoId}/${dirPath}`;
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error("Failed to list documentation directory");
+  }
+  return await response.json();
+};
