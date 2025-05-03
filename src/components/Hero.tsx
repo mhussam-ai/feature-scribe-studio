@@ -31,8 +31,10 @@ const Hero = () => {
             </p>
             
             <div className="flex flex-wrap gap-4">
-              <Button className="btn-primary text-base flex items-center gap-2">
-                Get Started <ArrowRight className="w-4 h-4" />
+              <Button className="btn-primary text-base flex items-center gap-2" asChild>
+                <a href="#upload">
+                  Get Started <ArrowRight className="w-4 h-4" />
+                </a>
               </Button>
               <Button variant="outline" className="text-base">
                 Watch Demo

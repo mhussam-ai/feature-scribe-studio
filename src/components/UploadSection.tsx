@@ -10,10 +10,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group" // Added import
 import { useToast } from "@/components/ui/use-toast";
 import { Upload, FileText, Image, Loader2, Download } from "lucide-react";
 import {
-  uploadVideo, 
+  uploadVideo,
   processVideo, 
   checkStatus, 
   getDocumentDownloadUrl 
@@ -29,8 +30,9 @@ const UploadSection = () => {
   const [processingStatus, setProcessingStatus] = useState<string>("");
   const [prompt, setPrompt] = useState<string>("");
   const [persona, setPersona] = useState<string>("");
-  const [companyWebsite, setCompanyWebsite] = useState<string>(""); // Add state for company website
-  const [isRecording, setIsRecording] = useState(false); // State for screen recording
+  const [companyWebsite, setCompanyWebsite] = useState<string>("");
+  const [isRecording, setIsRecording] = useState(false);
+  const [buildTarget, setBuildTarget] = useState<"user guide" | "deck">("user guide"); // Added state for build target
   const { toast } = useToast();
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -76,10 +78,11 @@ const UploadSection = () => {
       setProcessingStatus("");
 
       try {
-        // TODO: Pass prompt, persona, and company website to the backend
+        // TODO: Pass prompt, persona, company website, and buildTarget to the backend
+        console.log("Build Target:", buildTarget); // Log the selected build target
         console.log("Prompt:", prompt);
         console.log("Persona:", persona);
-        console.log("Company Website:", companyWebsite); // Log the new state
+        console.log("Company Website:", companyWebsite);
 
         // Upload the file
         const uploadResponse = await uploadVideo(file); // Modify API call if needed
@@ -185,50 +188,78 @@ const UploadSection = () => {
         </div>
 
         <div className="max-w-3xl mx-auto">
-          <div 
+          {/* Build Target Selection */}
+          <div className="mb-8 p-6 bg-white rounded-xl shadow-sm border border-gray-200">
+            <Label className="text-xl font-semibold mb-6 block text-center text-gray-800">What do you want to build?</Label>
+            <RadioGroup
+              defaultValue="user guide"
+              className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+              value={buildTarget}
+              onValueChange={(value: "user guide" | "deck") => setBuildTarget(value)}
+            >
+              {/* User Guide Option - Corrected Label structure */}
+              <Label htmlFor="r1" className={`flex flex-col items-center p-6 border rounded-lg cursor-pointer transition-all ${buildTarget === 'user guide' ? 'bg-blue-50 border-blue-300 ring-2 ring-blue-200' : 'hover:bg-gray-50 border-gray-200'}`}>
+                <div className="flex items-center w-full justify-between mb-2">
+                  <span className="font-medium text-lg text-gray-700">Build a User Guide</span>
+                  <RadioGroupItem value="user guide" id="r1" className="shrink-0" />
+                </div>
+                <p className="text-sm text-gray-500 text-center w-full">Generate detailed step-by-step instructions and guides.</p>
+              </Label>
+              {/* Deck Option - Corrected Label structure */}
+              <Label htmlFor="r2" className={`flex flex-col items-center p-6 border rounded-lg cursor-pointer transition-all ${buildTarget === 'deck' ? 'bg-blue-50 border-blue-300 ring-2 ring-blue-200' : 'hover:bg-gray-50 border-gray-200'}`}>
+                <div className="flex items-center w-full justify-between mb-2">
+                  <span className="font-medium text-lg text-gray-700">Build a Deck</span>
+                  <RadioGroupItem value="deck" id="r2" className="shrink-0" />
+                </div>
+                <p className="text-sm text-gray-500 text-center w-full">Create presentation slides summarizing key features or flows.</p>
+              </Label>
+            </RadioGroup> {/* Correctly closed RadioGroup */}
+          </div>
+
+          {/* File Upload Area */}
+          <div
             className={`
-              border-2 border-dashed rounded-xl p-8 
-              ${file ? 'border-blue-400 bg-blue-50' : 'border-gray-300'} 
-              transition-all duration-200
+              border-2 border-dashed rounded-xl p-10 
+              ${file ? 'border-blue-500 bg-blue-50/50' : 'border-gray-300 hover:border-gray-400'} 
+              transition-all duration-300 ease-in-out bg-white
             `}
             onDragOver={handleDragOver}
             onDrop={handleDrop}
           >
             {!file ? (
-              <div className="text-center py-8">
-                <div className="flex justify-center mb-4">
-                  <div className="bg-blue-100 rounded-full p-3">
-                    <Upload className="h-8 w-8 text-blue-600" />
+              // Initial Upload View - Corrected structure and styling
+              <div className="text-center">
+                <div className="flex justify-center mb-6">
+                  <div className="bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full p-4 shadow-sm">
+                    <Upload className="h-10 w-10 text-blue-600" />
                   </div>
                 </div>
-                <h3 className="text-xl font-semibold mb-2">Drag & drop files here</h3>
-                <p className="text-gray-500 mb-4">or click to browse from your computer</p>
-                <div className="flex flex-col sm:flex-row justify-center gap-4 mb-6">
-                  <Button 
+                <h3 className="text-2xl font-semibold mb-2 text-gray-700">Drag & drop files here</h3>
+                <p className="text-gray-500 mb-6">or click one of the options below</p>
+                <div className="flex flex-col sm:flex-row justify-center gap-4 mb-8">
+                  <Button
                     variant="outline"
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-2 py-2 px-4 text-base hover:bg-gray-50" // Added hover effect
                     onClick={() => document.getElementById('videoInput')?.click()}
                   >
-                    <FileText className="h-4 w-4" />
+                    <FileText className="h-5 w-5" />
                     Upload Video
                   </Button>
-                  <Button 
+                  <Button
                     variant="outline"
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-2 py-2 px-4 text-base hover:bg-gray-50" // Added hover effect
                     onClick={() => document.getElementById('imageInput')?.click()}
                   >
-                    <Image className="h-4 w-4" />
+                    <Image className="h-5 w-5" />
                     Upload Image
                   </Button>
-                  {/* Add Screen Record Button */}
-                  <Button 
+                  <Button
                     variant="outline"
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-2 py-2 px-4 text-base hover:bg-gray-50" // Added hover effect
                     onClick={handleScreenRecord}
-                    disabled={isRecording} // Disable while recording
+                    disabled={isRecording}
                   >
-                    {/* You might want a specific icon for screen recording */}
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
                     Screen Record
@@ -249,26 +280,27 @@ const UploadSection = () => {
                   onChange={handleFileInputChange}
                   className="hidden"
                 />
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-gray-500">
                   Supported formats: MP4, MOV, PNG, JPG (max 500MB)
                 </p>
               </div>
             ) : (
+              // File Selected View - Corrected structure and styling
               <div className="text-center py-6">
-                <div className="flex justify-center mb-4">
+                <div className="flex justify-center mb-6"> {/* Increased margin */}
                   {uploadType === "video" ? (
-                    <FileText className="h-12 w-12 text-blue-600" />
+                    <FileText className="h-16 w-16 text-blue-600" />
                   ) : (
-                    <Image className="h-12 w-12 text-blue-600" />
+                    <Image className="h-16 w-16 text-blue-600" />
                   )}
                 </div>
-                <h3 className="text-lg font-semibold mb-1">{file.name}</h3>
-                <p className="text-gray-500 mb-4">
+                <h3 className="text-xl font-semibold mb-2 text-gray-800">{file.name}</h3> {/* Increased bottom margin */}
+                <p className="text-gray-600 mb-6"> {/* Increased bottom margin */}
                   {(file.size / 1024 / 1024).toFixed(2)} MB
                 </p>
 
-                {/* Form Fields - Moved here */}
-                <div className="mt-6 mb-4 text-left max-w-md mx-auto space-y-4">
+                {/* Form Fields */}
+                <div className="mt-6 mb-6 text-left max-w-md mx-auto space-y-4"> {/* Adjusted margin */}
                   <div>
                     <Label htmlFor="prompt" className="text-sm font-medium text-gray-700">
                       Prompt (Optional)
@@ -434,7 +466,7 @@ const UploadSection = () => {
           </div>
         </div>
       </div>
-    </section>
+    </section> // Correctly closed section
   );
 };
 
