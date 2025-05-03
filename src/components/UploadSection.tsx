@@ -1,13 +1,23 @@
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { Upload, FileText, Image, Loader2 } from "lucide-react";
+import { Upload, FileText, Image, Loader2, Download } from "lucide-react";
+import { 
+  uploadVideo, 
+  processVideo, 
+  checkStatus, 
+  getDocumentDownloadUrl 
+} from "@/services/apiService";
+import ProcessingStatus from "./ProcessingStatus";
+import { Link } from "react-router-dom";
 
 const UploadSection = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadType, setUploadType] = useState<"video" | "image" | null>(null);
   const [file, setFile] = useState<File | null>(null);
+  const [videoId, setVideoId] = useState<string | null>(null);
+  const [processingStatus, setProcessingStatus] = useState<string>("");
   const { toast } = useToast();
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -46,21 +56,80 @@ const UploadSection = () => {
     }
   };
 
-  const handleUpload = () => {
+  const handleUpload = async () => {
     if (!file) return;
     
     setIsUploading(true);
+    setProcessingStatus("");
     
-    // Simulate upload
-    setTimeout(() => {
-      setIsUploading(false);
+    try {
+      // Upload the file
+      const uploadResponse = await uploadVideo(file);
+      setVideoId(uploadResponse.video_id);
+      setProcessingStatus("uploaded");
+      
       toast({
         title: "Upload successful!",
-        description: `Your ${uploadType} has been uploaded and is being processed.`,
+        description: "Starting document generation process...",
       });
       
-      // In a real app, we would redirect to a processing or results page
-    }, 2000);
+      // Start processing
+      await processVideo(uploadResponse.video_id);
+      
+      // Begin polling for status
+      checkProcessingStatus(uploadResponse.video_id);
+      
+    } catch (error) {
+      console.error("Upload error:", error);
+      setIsUploading(false);
+      toast({
+        title: "Upload failed",
+        description: error instanceof Error ? error.message : "An unknown error occurred",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  const checkProcessingStatus = async (id: string) => {
+    try {
+      const statusResponse = await checkStatus(id);
+      setProcessingStatus(statusResponse.status);
+      
+      if (statusResponse.status !== "done" && 
+          !statusResponse.status.startsWith("error")) {
+        // Continue polling every 3 seconds until done or error
+        setTimeout(() => checkProcessingStatus(id), 3000);
+      } else {
+        setIsUploading(false);
+        if (statusResponse.status === "done") {
+          toast({
+            title: "Success!",
+            description: "Your documentation has been generated successfully.",
+          });
+        } else if (statusResponse.status.startsWith("error")) {
+          toast({
+            title: "Processing Error",
+            description: statusResponse.status.replace("error: ", ""),
+            variant: "destructive",
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Status check error:", error);
+      setIsUploading(false);
+      toast({
+        title: "Status check failed",
+        description: error instanceof Error ? error.message : "An unknown error occurred",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const resetForm = () => {
+    setFile(null);
+    setUploadType(null);
+    setVideoId(null);
+    setProcessingStatus("");
   };
 
   return (
@@ -141,37 +210,73 @@ const UploadSection = () => {
                 <p className="text-gray-500 mb-4">
                   {(file.size / 1024 / 1024).toFixed(2)} MB
                 </p>
-                <div className="flex justify-center gap-4 mb-4">
+                
+                {videoId && processingStatus && (
+                  <ProcessingStatus status={processingStatus} />
+                )}
+                
+                <div className="flex justify-center gap-4 mt-6">
                   <Button 
                     variant="outline"
-                    onClick={() => {
-                      setFile(null);
-                      setUploadType(null);
-                    }}
-                    disabled={isUploading}
+                    onClick={resetForm}
+                    disabled={isUploading && processingStatus !== "done" && !processingStatus.startsWith("error")}
                   >
-                    Cancel
+                    {processingStatus === "done" ? "Upload Another" : "Cancel"}
                   </Button>
-                  <Button 
-                    onClick={handleUpload}
-                    disabled={isUploading}
-                    className="flex items-center gap-2"
-                  >
-                    {isUploading ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Processing...
-                      </>
-                    ) : (
-                      <>
-                        <Upload className="h-4 w-4" />
-                        Upload & Process
-                      </>
-                    )}
-                  </Button>
+                  
+                  {!videoId ? (
+                    <Button 
+                      onClick={handleUpload}
+                      disabled={isUploading}
+                      className="flex items-center gap-2"
+                    >
+                      {isUploading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Uploading...
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="h-4 w-4" />
+                          Upload & Process
+                        </>
+                      )}
+                    </Button>
+                  ) : processingStatus === "done" ? (
+                    <Button 
+                      className="flex items-center gap-2"
+                      asChild
+                    >
+                      <a href={getDocumentDownloadUrl(videoId)} target="_blank" rel="noopener noreferrer">
+                        <Download className="h-4 w-4" />
+                        Download Documentation
+                      </a>
+                    </Button>
+                  ) : processingStatus.startsWith("error") ? (
+                    <Button 
+                      onClick={handleUpload}
+                      className="flex items-center gap-2"
+                    >
+                      Try Again
+                    </Button>
+                  ) : null}
                 </div>
-                <p className="text-sm text-gray-400">
-                  Your file will be securely processed and analyzed
+                
+                {processingStatus === "done" && (
+                  <div className="mt-4">
+                    <Link 
+                      to={`/document/${videoId}`} 
+                      className="text-blue-600 hover:text-blue-800 font-medium"
+                    >
+                      View Documentation Online
+                    </Link>
+                  </div>
+                )}
+                
+                <p className="text-sm text-gray-400 mt-4">
+                  {processingStatus === "done" 
+                    ? "Your documentation has been generated successfully" 
+                    : "Your file will be securely processed and analyzed"}
                 </p>
               </div>
             )}
