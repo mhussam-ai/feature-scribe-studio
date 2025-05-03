@@ -60,17 +60,21 @@ const ProcessingStatus = ({ status }: ProcessingStatusProps) => {
   const isProcessing = !isError && !isComplete && status !== "not_found";
 
   return (
-    <div className="mt-4 space-y-3">
+    <div className="mt-4 space-y-3 p-4 bg-muted/50 rounded-lg border border-border"> {/* Added container styling */}
       <div className="flex items-center justify-between">
-        <span className="text-sm font-medium">Status: {getStatusDisplay()}</span>
+        {/* Updated text color */}
+        <span className={`text-sm font-medium ${isError ? 'text-destructive' : 'text-foreground'}`}>
+          Status: {getStatusDisplay()}
+        </span>
         <span>
-          {isError && <AlertCircle className="h-5 w-5 text-red-500" />}
-          {isComplete && <CheckCircle className="h-5 w-5 text-green-500" />}
-          {isProcessing && <Clock className="h-5 w-5 text-blue-500" />}
+          {/* Updated icon colors */}
+          {isError && <AlertCircle className="h-5 w-5 text-destructive" />}
+          {isComplete && <CheckCircle className="h-5 w-5 text-emerald-600" />} {/* Using emerald for success */}
+          {isProcessing && <Clock className="h-5 w-5 text-primary animate-pulse" />} {/* Added subtle pulse */}
         </span>
       </div>
-
-      <Progress value={getProgressPercentage()} className="w-full" />
+      {/* Progress bar will use primary color from theme */}
+      <Progress value={getProgressPercentage()} className="w-full h-2" /> {/* Adjusted height */}
     </div>
   );
 };

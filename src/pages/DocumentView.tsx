@@ -1,18 +1,18 @@
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChevronLeft, Download, FileText, Copy, CheckCircle, Share2, Loader2 } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"; // Import Card
+import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton
+import { ChevronLeft, Download, FileText, Copy, CheckCircle, Share2, Loader2, AlertCircle, Folder, File } from "lucide-react"; // Added icons
 import { Link, useParams } from "react-router-dom";
 import { getMarkdownFileUrl, listDocsDirectory, getDocumentDownloadUrl } from "@/services/apiService";
 import { useToast } from "@/components/ui/use-toast";
-import { useQuery } from "@tanstack/react-query";
-
-// Markdown parser dependency will be added
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm'; // Add GFM support for tables, etc.
 
+// Define DocNode type
 interface DocNode {
   name: string;
   path: string;
@@ -20,12 +20,22 @@ interface DocNode {
   children?: DocNode[];
 }
 
+// Fetch Markdown Content Function
 const fetchMarkdownContent = async (videoId: string, filePath: string): Promise<string> => {
-  const response = await fetch(getMarkdownFileUrl(videoId, filePath));
+  const url = getMarkdownFileUrl(videoId, filePath);
+  console.log(`Fetching markdown from: ${url}`); // Log URL
+  const response = await fetch(url);
   if (!response.ok) {
-    throw new Error("Failed to fetch markdown file");
+    console.error(`Failed to fetch markdown: ${response.status} ${response.statusText}`);
+    throw new Error(`Failed to fetch markdown file (${response.status})`);
   }
   return await response.text();
+};
+
+// Fetch Directory Tree Function
+const fetchDirectoryTree = async (videoId: string): Promise<DocNode[]> => {
+  console.log(`Fetching directory tree for ID: ${videoId}`);
+  return await listDocsDirectory(videoId, "");
 };
 
 const DocumentView = () => {
@@ -35,227 +45,294 @@ const DocumentView = () => {
   const [tree, setTree] = useState<DocNode[] | null>(null);
   const [selectedFile, setSelectedFile] = useState<string>("");
   const [markdownContent, setMarkdownContent] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isError, setIsError] = useState<boolean>(false);
-  const [error, setError] = useState<Error | null>(null);
+  const [isLoadingTree, setIsLoadingTree] = useState<boolean>(true);
+  const [isLoadingContent, setIsLoadingContent] = useState<boolean>(false);
+  const [errorTree, setErrorTree] = useState<Error | null>(null);
+  const [errorContent, setErrorContent] = useState<Error | null>(null);
 
   // Fetch folder/file tree on mount
   useEffect(() => {
-    if (!id) return;
-    listDocsDirectory(id, "").then((data) => {
-      setTree(data);
-      // Find README.md or first .md file
-      const findFirstMd = (nodes: DocNode[]): string | null => {
-        for (const node of nodes) {
-          if (node.type === 'file' && node.name.toLowerCase() === 'readme.md') return node.path;
-        }
-        for (const node of nodes) {
-          if (node.type === 'file' && node.name.endsWith('.md')) return node.path;
-        }
-        for (const node of nodes) {
-          if (node.type === 'folder' && node.children) {
-            const found = findFirstMd(node.children);
-            if (found) return found;
+    if (!id) {
+      setIsLoadingTree(false);
+      setErrorTree(new Error("Document ID not provided"));
+      return;
+    }
+    setIsLoadingTree(true);
+    setErrorTree(null);
+    fetchDirectoryTree(id)
+      .then((data) => {
+        setTree(data);
+        // Find README.md or first .md file to select initially
+        const findFirstMd = (nodes: DocNode[]): string | null => {
+          let firstMd: string | null = null;
+          for (const node of nodes) {
+            if (node.type === 'file' && node.name.toLowerCase() === 'readme.md') return node.path;
+            if (!firstMd && node.type === 'file' && node.name.endsWith('.md')) firstMd = node.path;
           }
+          if (firstMd) return firstMd;
+          // If no top-level md, search folders
+          for (const node of nodes) {
+            if (node.type === 'folder' && node.children) {
+              const found = findFirstMd(node.children);
+              if (found) return found;
+            }
+          }
+          return null;
+        };
+        const firstFile = findFirstMd(data);
+        if (firstFile) {
+          setSelectedFile(firstFile);
+        } else {
+          console.log("No initial .md file found in tree.");
+           // Optionally select the first file of any type if no markdown found
+           // if (data.length > 0 && data[0].type === 'file') setSelectedFile(data[0].path);
         }
-        return null;
-      };
-      const first = findFirstMd(data);
-      if (first) setSelectedFile(first);
-    }).catch(setError);
-  }, [id]);
+      })
+      .catch((err) => {
+        console.error("Error fetching directory tree:", err);
+        setErrorTree(err);
+        toast({ title: "Error Loading File Tree", description: err.message, variant: "destructive" });
+      })
+      .finally(() => setIsLoadingTree(false));
+  }, [id, toast]);
 
   // Fetch markdown content when selectedFile changes
   useEffect(() => {
-    if (!id || !selectedFile) return;
-    setIsLoading(true);
-    setIsError(false);
+    if (!id || !selectedFile) {
+      setMarkdownContent(""); // Clear content if no file selected
+      return;
+    }
+    setIsLoadingContent(true);
+    setErrorContent(null);
+    setMarkdownContent(""); // Clear previous content immediately
+
     fetchMarkdownContent(id, selectedFile)
       .then(setMarkdownContent)
       .catch((err) => {
-        setIsError(true);
-        setError(err);
-        setMarkdownContent("");
+        console.error(`Error fetching content for ${selectedFile}:`, err);
+        setErrorContent(err);
+        toast({ title: "Error Loading Document", description: err.message, variant: "destructive" });
       })
-      .finally(() => setIsLoading(false));
-  }, [id, selectedFile]);
+      .finally(() => setIsLoadingContent(false));
+  }, [id, selectedFile, toast]);
 
-  useEffect(() => {
-    if (isError && error) {
-      toast({
-        title: "Error fetching document",
-        description: error instanceof Error ? error.message : "Failed to load document",
-        variant: "destructive",
-      });
-    }
-  }, [isError, error, toast]);
 
-  const handleCopy = () => {
+  const handleCopy = useCallback(() => {
     if (markdownContent) {
-      navigator.clipboard.writeText(markdownContent);
-      setCopied(true);
-      toast({
-        title: "Copied to clipboard",
-        description: "Document content has been copied to your clipboard",
+      navigator.clipboard.writeText(markdownContent).then(() => {
+        setCopied(true);
+        toast({
+          title: "Copied to clipboard!",
+          description: "Document content copied.",
+        });
+        setTimeout(() => setCopied(false), 2000);
+      }).catch(err => {
+         toast({ title: "Copy Failed", description: err.message, variant: "destructive" });
       });
-      setTimeout(() => setCopied(false), 2000);
     }
-  };
+  }, [markdownContent, toast]);
 
-  // Recursive sidebar tree
-  const renderTree = (nodes: DocNode[]) => (
-    <ul className="pl-2">
+  // Recursive sidebar tree renderer
+  const renderTree = useCallback((nodes: DocNode[], level = 0): React.ReactNode => (
+    <ul className={level > 0 ? "pl-4" : ""}>
       {nodes.map((node) => (
-        <li key={node.path} className="mb-1">
+        <li key={node.path} className="my-0.5">
           {node.type === 'file' ? (
             <button
-              className={`text-left text-blue-700 hover:underline ${selectedFile === node.path ? 'font-bold underline' : ''}`}
+              className={`flex items-center gap-2 w-full text-left text-sm px-2 py-1 rounded-md transition-colors ${selectedFile === node.path
+                  ? 'bg-primary/10 text-primary font-semibold'
+                  : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                }`}
               onClick={() => setSelectedFile(node.path)}
+              title={node.path}
             >
-              {node.name}
+              <FileText className="h-4 w-4 flex-shrink-0" />
+              <span className="truncate">{node.name}</span>
             </button>
           ) : (
-            <>
-              <span className="font-semibold">{node.name}</span>
-              {node.children && renderTree(node.children)}
-            </>
+            <div>
+              <div className="flex items-center gap-2 text-sm font-medium text-foreground px-2 py-1">
+                 <Folder className="h-4 w-4 flex-shrink-0" />
+                 <span>{node.name}</span>
+              </div>
+              {node.children && renderTree(node.children, level + 1)}
+            </div>
           )}
         </li>
       ))}
     </ul>
+  ), [selectedFile]);
+
+  // Skeleton for Tree
+  const TreeSkeleton = () => (
+    <div className="space-y-2">
+      <Skeleton className="h-6 w-3/4" />
+      <Skeleton className="h-6 w-1/2 ml-4" />
+      <Skeleton className="h-6 w-2/3 ml-4" />
+      <Skeleton className="h-6 w-full" />
+      <Skeleton className="h-6 w-1/2 ml-4" />
+    </div>
   );
 
+   // Skeleton for Content
+  const ContentSkeleton = () => (
+    <div className="space-y-4">
+      <Skeleton className="h-8 w-1/4" />
+      <Skeleton className="h-4 w-full" />
+      <Skeleton className="h-4 w-full" />
+      <Skeleton className="h-4 w-3/4" />
+      <Skeleton className="h-20 w-full" />
+       <Skeleton className="h-4 w-full" />
+       <Skeleton className="h-4 w-5/6" />
+    </div>
+  );
+
+
   if (!id) {
-    return <div className="p-8 text-center">Document ID not provided</div>;
+    // Handle case where ID is missing more gracefully
+     return (
+       <div className="min-h-screen flex flex-col">
+         <Navbar />
+         <div className="flex-grow flex items-center justify-center text-center p-8">
+           <div>
+             <AlertCircle className="mx-auto h-12 w-12 text-destructive mb-4" />
+             <h1 className="text-2xl font-bold mb-2">Error</h1>
+             <p className="text-muted-foreground mb-4">Document ID not found in URL.</p>
+             <Button asChild>
+               <Link to="/dashboard">Go to Dashboard</Link>
+             </Button>
+           </div>
+         </div>
+         <Footer />
+       </div>
+     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-secondary"> {/* Use theme background */}
       <Navbar />
-      
-      <div className="flex-grow bg-gray-50 py-8">
+
+      <div className="flex-grow py-8">
         <div className="container-custom">
+          {/* Header Section */}
           <div className="mb-6">
-            <Link to="/dashboard" className="flex items-center text-gray-600 hover:text-gray-900 mb-4">
-              <ChevronLeft className="h-4 w-4 mr-1" /> Back to Dashboard
-            </Link>
+            <Button variant="ghost" size="sm" asChild className="mb-4 text-muted-foreground hover:text-foreground">
+              <Link to="/dashboard">
+                <ChevronLeft className="h-4 w-4 mr-1" /> Back to Dashboard
+              </Link>
+            </Button>
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold">Generated Documentation</h1>
-                <p className="text-gray-600">Document ID: {id}</p>
+                <h1 className="text-2xl md:text-3xl font-bold text-foreground">Generated Documentation</h1>
+                <p className="text-sm text-muted-foreground">Document ID: {id}</p>
               </div>
-              <div className="flex flex-wrap gap-3">
-                <Button 
-                  variant="outline" 
-                  className="flex items-center gap-1"
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-1.5"
                   onClick={handleCopy}
-                  disabled={isLoading || isError}
+                  disabled={isLoadingContent || !markdownContent}
                 >
-                  {copied ? (
-                    <CheckCircle className="h-4 w-4" />
-                  ) : (
-                    <Copy className="h-4 w-4" />
-                  )}
-                  {copied ? "Copied" : "Copy"}
+                  {copied ? <CheckCircle className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                  {copied ? "Copied" : "Copy Markdown"}
                 </Button>
-                <Button 
-                  variant="outline" 
-                  className="flex items-center gap-1"
-                  disabled={isLoading || isError}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-1.5"
                   asChild
                 >
                   <a href={getDocumentDownloadUrl(id)} download>
-                    <Download className="h-4 w-4" /> Export
+                    <Download className="h-4 w-4" /> Export (.zip)
                   </a>
                 </Button>
-                <Button 
-                  className="flex items-center gap-1"
-                  disabled={isLoading || isError}
-                >
+                {/* Share functionality can be implemented later */}
+                {/* <Button size="sm" className="flex items-center gap-1.5">
                   <Share2 className="h-4 w-4" /> Share
-                </Button>
+                </Button> */}
               </div>
             </div>
           </div>
-                   <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            {/* Sidebar with file/folder tree */}
-            <div className="col-span-1">
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 h-full">
-                <h3 className="text-lg font-medium mb-4">Documentation Files</h3>
-                {tree ? renderTree(tree) : <div>Loading file tree...</div>}
-              </div>
-            </div>
-            {/* Main content area */}
-            <div className="col-span-1 md:col-span-3">
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
-                      className="flex items-center gap-1"
-                      onClick={handleCopy}
-                      disabled={isLoading || isError}
-                    >
-                      {copied ? <CheckCircle className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                      {copied ? "Copied" : "Copy"}
-                    </Button>
-                  </div>
-                  <div className="text-xs text-gray-400">{selectedFile}</div>
-                </div>
-                <Tabs defaultValue="document">
-                  <TabsList className="mb-6">
-                    <TabsTrigger value="document">Document</TabsTrigger>
-                    <TabsTrigger value="markdown">Raw Markdown</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="document" className="space-y-6 min-h-[400px]">
-                    {isLoading ? (
-                      <div className="flex items-center justify-center h-64">
-                        <div className="text-center">
-                          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
-                          <p>Loading documentation...</p>
+
+          {/* Main Layout: Sidebar + Content */}
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* Sidebar Card */}
+            <Card className="col-span-1 lg:h-[calc(100vh-220px)] flex flex-col"> {/* Adjust height */}
+               <CardHeader className="pb-3 pt-4 px-4 border-b">
+                 <CardTitle className="text-base font-semibold">Document Files</CardTitle>
+               </CardHeader>
+               <CardContent className="p-2 flex-grow overflow-y-auto">
+                 {isLoadingTree ? (
+                   <TreeSkeleton />
+                 ) : errorTree ? (
+                   <p className="text-xs text-destructive p-2">Error loading tree.</p>
+                 ) : tree && tree.length > 0 ? (
+                   renderTree(tree)
+                 ) : (
+                   <p className="text-xs text-muted-foreground p-2">No files found.</p>
+                 )}
+               </CardContent>
+            </Card>
+
+            {/* Content Card */}
+            <Card className="col-span-1 lg:col-span-3 lg:h-[calc(100vh-220px)] flex flex-col"> {/* Adjust height */}
+               <Tabs defaultValue="document" className="flex flex-col flex-grow">
+                 <CardHeader className="px-4 pt-4 pb-0 border-b">
+                    <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+                       <TabsList>
+                         <TabsTrigger value="document">Preview</TabsTrigger>
+                         <TabsTrigger value="markdown">Markdown</TabsTrigger>
+                       </TabsList>
+                       <span className="text-xs text-muted-foreground truncate" title={selectedFile}>
+                         {selectedFile || "No file selected"}
+                       </span>
+                    </div>
+                 </CardHeader>
+                 <CardContent className="p-4 md:p-6 flex-grow overflow-y-auto">
+                    <TabsContent value="document" className="mt-0">
+                      {isLoadingContent ? (
+                        <ContentSkeleton />
+                      ) : errorContent ? (
+                        <div className="text-center py-12">
+                          <AlertCircle className="mx-auto h-10 w-10 text-destructive mb-4" />
+                          <p className="text-destructive mb-4">Failed to load document content.</p>
+                          <Button size="sm" onClick={() => setSelectedFile(selectedFile)}>Try Again</Button>
                         </div>
-                      </div>
-                    ) : isError ? (
-                      <div className="text-center py-12">
-                        <p className="text-red-500 mb-4">Failed to load document</p>
-                        <Button onClick={() => setSelectedFile(selectedFile)}>
-                          Try Again
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="prose prose-blue max-w-none">
-                        <ReactMarkdown>{markdownContent || ''}</ReactMarkdown>
-                      </div>
-                    )}
-                  </TabsContent>
-                  <TabsContent value="markdown" className="min-h-[400px]">
-                    {isLoading ? (
-                      <div className="flex items-center justify-center h-64">
-                        <div className="text-center">
-                          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
-                          <p>Loading markdown...</p>
+                      ) : markdownContent ? (
+                        // Use prose with dark mode support
+                        <article className="prose dark:prose-invert max-w-none">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>{markdownContent}</ReactMarkdown>
+                        </article>
+                      ) : (
+                         <div className="text-center py-12 text-muted-foreground">
+                            <File className="mx-auto h-10 w-10 mb-4" />
+                            <p>{selectedFile ? "Empty file or invalid content." : "Select a file from the sidebar to view its content."}</p>
+                         </div>
+                      )}
+                    </TabsContent>
+                    <TabsContent value="markdown" className="mt-0">
+                      {isLoadingContent ? (
+                         <ContentSkeleton />
+                      ) : errorContent ? (
+                        <div className="text-center py-12">
+                          <AlertCircle className="mx-auto h-10 w-10 text-destructive mb-4" />
+                          <p className="text-destructive mb-4">Failed to load markdown content.</p>
+                           <Button size="sm" onClick={() => setSelectedFile(selectedFile)}>Try Again</Button>
                         </div>
-                      </div>
-                    ) : isError ? (
-                      <div className="text-center py-12">
-                        <p className="text-red-500 mb-4">Failed to load markdown</p>
-                        <Button onClick={() => setSelectedFile(selectedFile)}>
-                          Try Again
-                        </Button>
-                      </div>
-                    ) : (
-                      <pre className="bg-gray-100 rounded p-4 overflow-x-auto whitespace-pre-wrap text-xs">
-                        {markdownContent || ''}
-                      </pre>
-                    )}
-                  </TabsContent>
-                </Tabs>
-              </div>
-            </div>
+                      ) : (
+                        <pre className="bg-muted rounded p-4 overflow-x-auto whitespace-pre-wrap text-xs font-mono h-[calc(100vh-350px)]"> {/* Adjust height */}
+                          {markdownContent || (selectedFile ? "Empty file." : "Select a file.")}
+                        </pre>
+                      )}
+                    </TabsContent>
+                 </CardContent>
+               </Tabs>
+            </Card>
           </div>
         </div>
       </div>
-      
+
       <Footer />
     </div>
   );

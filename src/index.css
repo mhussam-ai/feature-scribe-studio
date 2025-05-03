@@ -7,36 +7,37 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 0 0% 100%; /* White */
+    --foreground: 215 28% 17%; /* Dark Slate Gray */
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 215 28% 17%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 215 28% 17%;
 
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 195 75% 40%; /* Deep Teal/Blue */
+    --primary-foreground: 0 0% 100%; /* White */
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 210 40% 96.1%; /* Light Gray */
+    --secondary-foreground: 215 28% 17%; /* Dark Slate Gray */
 
     --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted-foreground: 215 20% 65%; /* Lighter Gray */
 
     --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent-foreground: 215 28% 17%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 72% 51%; /* Adjusted Red */
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
+    --border: 214.3 31.8% 91.4%; /* Default Light Gray */
+    --input: 214.3 31.8% 91.4%; /* Default Light Gray */
+    --ring: 195 75% 40%; /* Match primary */
 
-    --radius: 0.5rem;
+    --radius: 0.75rem; /* Softer Corners */
 
+    /* Keep sidebar colors for now, might adjust later */
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;
@@ -44,38 +45,39 @@
     --sidebar-accent: 240 4.8% 95.9%;
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 195 75% 40%; /* Match primary */
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 220 18% 11%; /* Very Dark Blue/Gray */
+    --foreground: 210 40% 98%; /* Near White */
 
-    --card: 222.2 84% 4.9%;
+    --card: 220 18% 13%; /* Slightly Lighter Dark */
     --card-foreground: 210 40% 98%;
 
-    --popover: 222.2 84% 4.9%;
+    --popover: 220 18% 11%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 195 70% 55%; /* Brighter Teal/Blue */
+    --primary-foreground: 215 28% 17%; /* Dark Slate Gray */
 
-    --secondary: 217.2 32.6% 17.5%;
+    --secondary: 217 33% 17%; /* Darker Gray */
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%; /* Lighter Gray */
 
-    --accent: 217.2 32.6% 17.5%;
+    --accent: 217 33% 17%;
     --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 63% 40%; /* Darker Red */
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
+    --border: 217 33% 20%; /* Slightly Lighter Border */
+    --input: 217 33% 20%;
+    --ring: 195 70% 55%; /* Match primary */
 
+    /* Keep sidebar colors for now, might adjust later */
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -83,7 +85,7 @@
     --sidebar-accent: 240 3.7% 15.9%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 195 70% 55%; /* Match primary */
   }
 }
 
@@ -108,9 +110,11 @@
   }
   
   .btn-primary {
-    @apply px-6 py-3 bg-primary text-white rounded-md hover:bg-blue-700 transition duration-300;
+    /* Let Shadcn handle button styling based on the new primary color */
+    /* Remove this custom class if relying solely on Shadcn's Button component */
+    /* @apply px-6 py-3 bg-primary text-white rounded-md hover:bg-blue-700 transition duration-300; */
   }
-  
+
   .container-custom {
     @apply container mx-auto px-4 sm:px-6 lg:px-8;
   }

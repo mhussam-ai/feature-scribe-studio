@@ -1,94 +1,103 @@
 
 import React from "react";
+// Removed duplicate imports below
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Chrome } from "lucide-react";
+import { ArrowRight, PlayCircle } from "lucide-react"; // Removed duplicate Chrome, kept PlayCircle
 
 const Hero = () => {
   return (
-    <div className="relative overflow-hidden py-16 sm:py-24">
-      {/* Background gradient */}
-      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-50 to-indigo-100 opacity-60"></div>
-      
+    <div className="relative overflow-hidden bg-background py-20 sm:py-28">
+      {/* Optional: Add a subtle background pattern or texture here if desired */}
+      {/* Example: <div className="absolute inset-0 bg-[url('/path/to/pattern.svg')] opacity-5"></div> */}
+
       {/* Content container */}
       <div className="container-custom relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           
           {/* Left column - Text */}
-          <div className="flex flex-col space-y-8">
+          <div className="flex flex-col space-y-8 text-center lg:text-left">
             <div>
-              <span className="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
-                New Platform for Startups
+              {/* Updated Badge Styling */}
+              <span className="inline-block bg-primary/10 text-primary text-sm font-semibold px-4 py-1.5 rounded-full">
+                AI-Powered Documentation
               </span>
             </div>
-            
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight">
-              Turn UI Videos into <span className="text-blue-600">Detailed Documentation</span>
+
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-foreground">
+              Turn UI Recordings into <span className="text-primary">Flawless Guides</span>
             </h1>
-            
-            <p className="text-lg text-gray-600 max-w-lg">
-              Upload your UI tutorial videos and screenshots. Our AI instantly converts them into 
-              comprehensive documentation for your new features and interfaces.
+
+            <p className="text-lg text-muted-foreground max-w-xl mx-auto lg:mx-0">
+              Stop writing docs manually. Upload UI videos or use our extension, and let AI generate step-by-step guides, tutorials, and SOPs instantly.
             </p>
-            
-            <div className="flex flex-wrap gap-4">
-              <Button className="btn-primary text-base flex items-center gap-2" asChild>
+
+            <div className="flex flex-wrap justify-center lg:justify-start gap-4">
+              {/* Updated Buttons using Shadcn variants */}
+              <Button size="lg" className="text-base flex items-center gap-2" asChild>
                 <a href="#upload">
-                  Get Started <ArrowRight className="w-4 h-4" />
+                  Get Started Free <ArrowRight className="w-4 h-4" />
                 </a>
               </Button>
-              <Button variant="outline" className="text-base">
-                Watch Demo
+              {/* Updated Watch Demo button to be a link to #how-it-works */}
+              <Button size="lg" variant="outline" className="text-base flex items-center gap-2" asChild>
+                 <a href="#how-it-works">
+                   <PlayCircle className="w-5 h-5" /> Watch Demo
+                 </a>
               </Button>
-              <Button variant="secondary" className="text-base flex items-center gap-2">
+              {/* Optional: Keep Chrome Extension button if relevant */}
+              {/* <Button size="lg" variant="secondary" className="text-base flex items-center gap-2">
                 <Chrome className="w-5 h-5" /> Chrome Extension
-              </Button>
+              </Button> */}
             </div>
-            
-            <div className="flex items-center space-x-4 text-sm text-gray-500">
+
+            <div className="flex items-center justify-center lg:justify-start space-x-4 text-sm text-muted-foreground pt-4">
               <div className="flex -space-x-2">
-                <div className="w-8 h-8 rounded-full bg-blue-200 flex items-center justify-center">
-                  <span className="text-xs font-medium text-blue-800">SK</span>
+                {/* Updated Avatar Placeholders */}
+                <div className="w-8 h-8 rounded-full bg-primary/20 border-2 border-background flex items-center justify-center">
+                  <span className="text-xs font-medium text-primary">S</span>
                 </div>
-                <div className="w-8 h-8 rounded-full bg-green-200 flex items-center justify-center">
-                  <span className="text-xs font-medium text-green-800">AG</span>
+                <div className="w-8 h-8 rounded-full bg-secondary border-2 border-background flex items-center justify-center">
+                  <span className="text-xs font-medium text-secondary-foreground">A</span>
                 </div>
-                <div className="w-8 h-8 rounded-full bg-purple-200 flex items-center justify-center">
-                  <span className="text-xs font-medium text-purple-800">TM</span>
-                </div>
-              </div>
-              <p>Join <span className="font-medium">200+</span> startups already using AdaptiDemo Labs</p>
-            </div>
-          </div>
-          
-          {/* Right column - Image */}
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/20 to-purple-500/20 rounded-2xl animate-pulse-subtle"></div>
-            <div className="relative bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200 animate-float">
-              <div className="bg-gray-50 h-8 border-b flex items-center px-4">
-                <div className="flex space-x-2">
-                  <div className="w-3 h-3 bg-red-400 rounded-full"></div>
-                  <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
-                  <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+                <div className="w-8 h-8 rounded-full bg-muted border-2 border-background flex items-center justify-center">
+                  <span className="text-xs font-medium text-muted-foreground">T</span>
                 </div>
               </div>
-              <div className="p-4">
-                <div className="bg-gray-100 h-40 rounded-md mb-4 flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-12 h-12 text-gray-400">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
+              {/* Corrected structure: Moved <p> inside the flex container */}
+              <p>Join <span className="font-semibold text-foreground">200+</span> startups already using AdaptiDemo Labs</p> {/* Reverted Name */}
+            </div> {/* This closes the flex container */}
+          </div> {/* This closes the text column */}
+
+          {/* Right column - Image/Graphic */}
+          <div className="relative mt-12 lg:mt-0">
+            {/* Removed pulsing background */}
+            {/* Simplified placeholder styling */}
+            <div className="relative bg-card rounded-xl shadow-lg overflow-hidden border border-border">
+              {/* Simplified Header */}
+              <div className="bg-muted/50 h-8 border-b flex items-center px-4">
+                <div className="flex space-x-1.5">
+                  <div className="w-2.5 h-2.5 bg-muted rounded-full"></div>
+                  <div className="w-2.5 h-2.5 bg-muted rounded-full"></div>
+                  <div className="w-2.5 h-2.5 bg-muted rounded-full"></div>
+                </div>
+              </div>
+              {/* Removed extra closing div */}
+              {/* Placeholder Content */}
+              <div className="p-6">
+                <div className="bg-muted h-48 rounded-lg mb-4 flex items-center justify-center">
+                  {/* Replace with actual product image/graphic */}
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-16 h-16 text-muted-foreground/50">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
                   </svg>
                 </div>
-                <div className="space-y-2">
-                  <div className="h-4 bg-gray-200 rounded-md w-full"></div>
-                  <div className="h-4 bg-gray-200 rounded-md w-3/4"></div>
-                  <div className="h-4 bg-gray-200 rounded-md w-5/6"></div>
+                <div className="space-y-3">
+                  <div className="h-4 bg-muted rounded w-full"></div>
+                  <div className="h-4 bg-muted rounded w-3/4"></div>
+                  <div className="h-4 bg-muted rounded w-5/6"></div>
                 </div>
               </div>
             </div>
-            <div className="absolute -bottom-4 -right-4 bg-blue-600 text-white p-4 rounded-lg shadow-lg">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
-            </div>
+            {/* Removed floating badge */}
           </div>
         </div>
       </div>

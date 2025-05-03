@@ -1,138 +1,128 @@
 
 import React from "react";
-import { Check } from "lucide-react";
+import {
+  Check,
+  Video,
+  ScanSearch,
+  FileText,
+  LayoutTemplate,
+  Users,
+  GitBranch,
+  Sparkles, // Added for AI emphasis
+} from "lucide-react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"; // Import Card components
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"; // Import Avatar
 
+// Updated features array with Lucide icons
 const features = [
   {
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-      </svg>
-    ),
+    icon: <Video className="w-6 h-6" />,
     title: "Video to Docs",
     description:
-      "Upload UI tutorial videos and our AI will automatically extract key information and generate structured documentation.",
+      "Upload UI recordings, and our AI automatically generates structured, step-by-step documentation.",
   },
   {
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-      </svg>
-    ),
+    icon: <ScanSearch className="w-6 h-6" />,
     title: "Screenshot Analysis",
     description:
-      "Upload screenshots and get detailed explanations of UI elements, workflows, and functionality in editable formats.",
+      "Analyze screenshots to get detailed explanations of UI elements, workflows, and functionality.",
   },
   {
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-      </svg>
-    ),
-    title: "Exportable Formats",
+    icon: <FileText className="w-6 h-6" />,
+    title: "Multiple Export Formats",
     description:
-      "Export your documentation in multiple formats including Markdown, PDF, and HTML for easy integration into your existing systems.",
+      "Export documentation in Markdown, PDF, HTML, and more for seamless integration.",
   },
   {
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-      </svg>
-    ),
+    icon: <LayoutTemplate className="w-6 h-6" />,
     title: "Customizable Templates",
     description:
-      "Choose from various documentation templates or create your own custom templates to match your brand identity.",
+      "Use pre-built templates or create your own to perfectly match your brand identity.",
   },
   {
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-      </svg>
-    ),
-    title: "Real-time Collaboration",
+    icon: <Users className="w-6 h-6" />,
+    title: "Team Collaboration",
     description:
-      "Collaborate with your team in real-time, making edits and improvements to your documentation together.",
+      "Collaborate in real-time with your team, making edits and ensuring documentation stays up-to-date.",
   },
   {
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    ),
+    icon: <GitBranch className="w-6 h-6" />,
     title: "Version Control",
     description:
-      "Keep track of all changes made to your documentation with built-in version control and revision history.",
+      "Track changes effortlessly with built-in version control and easily revert to previous revisions.",
   },
 ];
 
 const Features = () => {
   return (
-    <section id="features" className="py-24 bg-white">
+    <section id="features" className="py-20 sm:py-28 bg-background"> {/* Updated background */}
       <div className="container-custom">
         <div className="text-center mb-16">
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-            Every Feature You Need to Create Amazing Documentation
+          <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4"> {/* Updated text color */}
+            Everything You Need, Powered by AI <Sparkles className="inline-block w-8 h-8 text-primary ml-2" />
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Save hours of manual documentation work with our AI-powered platform
-            designed specifically for startup product teams.
+          <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto"> {/* Updated text color */}
+            Save countless hours and deliver polished documentation effortlessly with our intelligent platform.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {/* Updated feature grid using Card component */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"> {/* Adjusted gap */}
           {features.map((feature, index) => (
-            <div
-              key={index}
-              className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-300"
-            >
-              <div className="h-12 w-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mb-4">
-                {feature.icon}
-              </div>
-              <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
-              <p className="text-gray-600">{feature.description}</p>
-            </div>
+            <Card key={index} className="flex flex-col"> {/* Use Card component */}
+              <CardHeader className="flex flex-row items-center gap-4 pb-4">
+                <div className="h-12 w-12 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0"> {/* Updated icon style */}
+                  {feature.icon}
+                </div>
+                <CardTitle className="text-lg font-semibold">{feature.title}</CardTitle> {/* Adjusted size */}
+              </CardHeader>
+              <CardContent className="flex-grow">
+                <p className="text-muted-foreground text-sm">{feature.description}</p> {/* Adjusted size */}
+              </CardContent>
+            </Card>
           ))}
         </div>
 
-        <div className="mt-16 bg-blue-50 rounded-2xl p-8">
-          <div className="flex flex-col md:flex-row gap-8 items-center">
-            <div className="md:w-1/2">
-              <h3 className="text-2xl font-bold mb-4">
-                Why Startups Choose AdaptiDemo Labs
+        {/* Updated Benefits & Testimonial Section */}
+        <div className="mt-20 bg-secondary rounded-xl p-8 md:p-12"> {/* Updated background and padding */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center"> {/* Use grid for better alignment */}
+            <div>
+              <h3 className="text-2xl font-bold text-foreground mb-6"> {/* Updated text color */}
+                Why Teams Love AdaptiDemo Labs {/* Reverted Name */}
               </h3>
               <ul className="space-y-3">
                 {[
-                  "Save 80% of the time spent on creating documentation",
-                  "Improve user onboarding with clear feature guides",
-                  "Keep documentation in sync with your latest UI changes",
-                  "Eliminate the need for technical writers",
-                  "Focus on building features, not documenting them",
+                  "Slash documentation time by up to 80%",
+                  "Onboard users faster with crystal-clear guides",
+                  "Keep docs perfectly synced with UI updates",
+                  "Free up developers to focus on building",
+                  "Ensure consistency across all documentation",
                 ].map((item, index) => (
                   <li key={index} className="flex items-start">
-                    <span className="mr-2 text-green-500 mt-1">
-                      <Check className="h-5 w-5" />
-                    </span>
-                    <span>{item}</span>
+                    <Check className="h-5 w-5 mr-3 text-primary mt-1 shrink-0" /> {/* Updated color */}
+                    <span className="text-muted-foreground">{item}</span> {/* Updated color */}
                   </li>
                 ))}
               </ul>
             </div>
-            <div className="md:w-1/2">
-              <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+            {/* Updated Testimonial using Card */}
+            <Card className="bg-card shadow-lg"> {/* Use Card */}
+              <CardContent className="p-6">
                 <div className="flex items-center space-x-4 mb-4">
-                  <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                    <span className="text-xl font-bold text-blue-600">CB</span>
-                  </div>
+                  <Avatar>
+                    <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" /> {/* Example image */}
+                    <AvatarFallback className="bg-primary/20 text-primary font-semibold">CB</AvatarFallback> {/* Updated style */}
+                  </Avatar>
                   <div>
-                    <h4 className="font-medium">Chris Blakely</h4>
-                    <p className="text-sm text-gray-500">CTO at TechFlow</p>
+                    <h4 className="font-semibold text-foreground">Chris Blakely</h4> {/* Updated color */}
+                    <p className="text-sm text-muted-foreground">CTO at TechFlow</p> {/* Updated color */}
                   </div>
                 </div>
-                <blockquote className="text-gray-700 italic">
-                  "AdaptiDemo Labs has been a game-changer for our team. We used to spend days creating documentation for new features. Now, we just upload our demo videos and get professional documentation in minutes."
+                <blockquote className="text-foreground italic border-l-4 border-primary pl-4"> {/* Updated style */}
+                  "AdaptiDemo Labs has been a game-changer. We used to spend days creating docs. Now, we just record a quick video and get professional guides in minutes. Absolutely essential." {/* Reverted Name */}
                 </blockquote>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>

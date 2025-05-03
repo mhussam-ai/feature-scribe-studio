@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 
 const LaunchingSoon = () => {
   React.useEffect(() => {
-    document.title = "Launching Soon - Adapti    Demo Labs";
+    document.title = "Launching Soon - AdaptiDemo Labs"; // Corrected typo
   }, []);
 
   return (

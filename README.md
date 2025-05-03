@@ -1,6 +1,8 @@
-# Welcome to your Lovable project
+# AdaptiDemo Labs
 
-## Project info
+AdaptiDemo Labs is a web application that uses AI to automatically generate documentation (user guides, tutorials, SOPs) from UI video recordings or screenshots.
+
+## Project info (Lovable)
 
 **URL**: https://lovable.dev/projects/d38d981c-be1b-43b7-ae5e-10fa9d658ff2
 
@@ -27,7 +29,7 @@ Follow these steps:
 git clone <YOUR_GIT_URL>
 
 # Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+cd feature-scribe-studio # Or your local directory name
 
 # Step 3: Install the necessary dependencies.
 npm i

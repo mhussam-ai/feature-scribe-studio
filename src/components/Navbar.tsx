@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, FlaskConical } from "lucide-react"; // Added FlaskConical
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -12,40 +12,38 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-white shadow-sm py-4 sticky top-0 z-50">
+    <nav className="bg-background/95 backdrop-blur border-b border-border py-3 sticky top-0 z-50"> {/* Updated style */}
       <div className="container-custom flex justify-between items-center">
         <Link to="/" className="flex items-center space-x-2">
-          <div className="bg-blue-600 text-white rounded-md p-1">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              className="w-6 h-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-              />
-            </svg>
+          {/* Updated Logo Background & Icon */}
+          <div className="bg-primary text-primary-foreground rounded-md p-1.5 flex items-center justify-center"> {/* Ensure icon is centered */}
+            <FlaskConical className="w-6 h-6" /> {/* Replaced SVG with Lucide Icon */}
           </div>
-          <span className="font-bold text-xl">AdaptiDemo Labs</span>
+          <span className="font-bold text-xl text-foreground">AdaptiDemo Labs</span> {/* Reverted Name */}
         </Link>
 
         {/* Desktop Menu */}
-        <div className="hidden md:flex items-center space-x-8">
-          <Link to="/" className="font-medium hover:text-blue-600 transition-colors">
+        <div className="hidden md:flex items-center space-x-6 lg:space-x-8"> {/* Adjusted spacing */}
+          {/* Updated Link Styling */}
+          <Link to="/" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
             Home
           </Link>
-          <Link to="/dashboard" className="font-medium hover:text-blue-600 transition-colors">
+          {/* Changed to standard anchor link */}
+          <a href="/#features" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+            Features
+          </a>
+           {/* Changed to standard anchor link */}
+          <a href="/#how-it-works" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+            How It Works
+          </a>
+          {/* Added Dashboard link back */}
+          <Link to="/dashboard" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
             Dashboard
           </Link>
-          <Link to="/launching-soon" className="font-medium hover:text-blue-600 transition-colors">
-            Launching Soon
-          </Link>
-          <Button className="btn-primary">Get Started</Button>
+          {/* Updated Get Started button to link to upload section */}
+          <Button size="sm" asChild>
+             <a href="#upload">Get Started</a>
+          </Button>
         </div>
 
         {/* Mobile menu button */}
@@ -62,44 +60,51 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="md:hidden bg-white py-4 px-6 shadow-md">
+        <div className="md:hidden absolute top-full left-0 w-full bg-background border-b border-border shadow-md py-4 px-6"> {/* Updated style */}
           <div className="flex flex-col space-y-4">
+            {/* Updated Link Styling */}
             <Link
               to="/"
-              className="font-medium hover:text-blue-600 transition-colors"
-              onClick={() => setIsMenuOpen(false)}
+              className="block font-medium text-foreground hover:text-primary transition-colors"
+              onClick={toggleMenu} // Use toggleMenu to close
             >
               Home
             </Link>
+            {/* Corrected opening tag from Link to a */}
+            <a
+              href="/#features"
+              className="block font-medium text-foreground hover:text-primary transition-colors"
+              onClick={toggleMenu}
+            >
+              Features
+            </a> {/* Changed to standard anchor link */}
+            <a
+              href="/#how-it-works"
+              className="block font-medium text-foreground hover:text-primary transition-colors"
+              onClick={toggleMenu}
+            >
+              How It Works
+            </a> {/* Changed to standard anchor link */}
+            {/* Added Dashboard link back to mobile menu */}
             <Link
               to="/dashboard"
-              className="font-medium hover:text-blue-600 transition-colors"
-              onClick={() => setIsMenuOpen(false)}
+              className="block font-medium text-foreground hover:text-primary transition-colors"
+              onClick={toggleMenu}
             >
               Dashboard
             </Link>
-            <Link
-              to="/#features"
-              className="font-medium hover:text-blue-600 transition-colors"
-              onClick={() => setIsMenuOpen(false)}
+            {/* Removed Pricing link */}
+            {/* <Link
+              to="/pricing"
+              className="block font-medium text-foreground hover:text-primary transition-colors"
+              onClick={toggleMenu}
             >
-              Features
-            </Link>
-            <Link
-              to="/#how-it-works"
-              className="font-medium hover:text-blue-600 transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              How It Works
-            </Link>
-            <Link
-              to="/launching-soon"
-              className="font-medium hover:text-blue-600 transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Launching Soon
-            </Link>
-            <Button className="btn-primary w-full">Get Started</Button>
+              Pricing
+            </Link> */}
+            {/* Updated Get Started button to link to upload section */}
+            <Button onClick={toggleMenu} className="w-full" asChild>
+               <a href="#upload">Get Started</a>
+            </Button>
           </div>
         </div>
       )}
