@@ -48,6 +48,9 @@ const Navbar = () => {
           <Link to="/#how-it-works" className="font-medium hover:text-blue-600 transition-colors">
             How It Works
           </Link>
+          <Link to="/launching-soon" className="font-medium hover:text-blue-600 transition-colors">
+            Launching Soon
+          </Link>
           <Button className="btn-primary">Get Started</Button>
         </div>
 
@@ -94,6 +97,13 @@ const Navbar = () => {
               onClick={() => setIsMenuOpen(false)}
             >
               How It Works
+            </Link>
+            <Link
+              to="/launching-soon"
+              className="font-medium hover:text-blue-600 transition-colors"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Launching Soon
             </Link>
             <Button className="btn-primary w-full">Get Started</Button>
           </div>

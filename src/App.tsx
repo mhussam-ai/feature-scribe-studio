@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import DocumentView from "./pages/DocumentView";
 import NotFound from "./pages/NotFound";
+import LaunchingSoon from "./pages/LaunchingSoon";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +22,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/document/:id" element={<DocumentView />} />
+          <Route path="/launching-soon" element={<LaunchingSoon />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
