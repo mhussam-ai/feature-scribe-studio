@@ -40,7 +40,7 @@ const DemoSection = () => {
           
           <div className="bg-gray-50 rounded-xl p-6">
             <div className="text-blue-600 text-5xl font-bold mb-4">x%</div>
-            <p className="text-gray-800">Uptick in lead conversion funnel</p>
+            <p className="text-gray-800">Uptick in lead funnel conversion</p>
           </div>
           
           <div className="bg-gray-50 rounded-xl p-6">
