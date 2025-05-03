@@ -10,64 +10,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { checkStatus } from "@/services/apiService";
 import { useQuery } from "@tanstack/react-query";
 
-// Mock function to simulate fetching documents from API
-// In a real implementation, this would call an API endpoint
-const fetchDocuments = async () => {
-  // This is a placeholder that would be replaced with actual API call
-  // Something like: return await fetch('/api/documents').then(res => res.json())
-  return mockDocuments;
-};
+import { fetchDocsFolders } from "@/services/apiService";
 
-const mockDocuments = [
-  {
-    id: "1",
-    title: "User Profile Redesign",
-    type: "video",
-    status: "completed",
-    date: "2023-05-01",
-    preview: "/placeholder.svg",
-  },
-  {
-    id: "2",
-    title: "New Dashboard Features",
-    type: "image",
-    status: "processing",
-    date: "2023-05-03",
-    preview: "/placeholder.svg",
-  },
-  {
-    id: "3",
-    title: "Mobile App Navigation",
-    type: "video",
-    status: "completed",
-    date: "2023-04-28",
-    preview: "/placeholder.svg",
-  },
-  {
-    id: "4",
-    title: "Payment Flow Update",
-    type: "video",
-    status: "completed",
-    date: "2023-04-25",
-    preview: "/placeholder.svg",
-  },
-  {
-    id: "5",
-    title: "Settings Page",
-    type: "image",
-    status: "failed",
-    date: "2023-04-22",
-    preview: "/placeholder.svg",
-  },
-  {
-    id: "6",
-    title: "Onboarding Tutorial",
-    type: "video",
-    status: "completed",
-    date: "2023-04-20",
-    preview: "/placeholder.svg",
-  },
-];
+// Fetch folders from the backend API
+const fetchDocuments = async () => {
+  return await fetchDocsFolders();
+};
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("all");

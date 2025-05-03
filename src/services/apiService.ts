@@ -6,6 +6,17 @@
 // API base URL - replace with your actual API URL when deployed
 const API_BASE_URL = "http://localhost:8000"; // Default FastAPI port
 
+/**
+ * Fetch all documentation folders (video_ids) from the backend
+ */
+export const fetchDocsFolders = async () => {
+  const response = await fetch(`${API_BASE_URL}/fetch_api/docs-folders`);
+  if (!response.ok) {
+    throw new Error("Failed to fetch documentation folders");
+  }
+  return await response.json();
+};
+
 export interface UploadResponse {
   video_id: string;
   filename: string;
