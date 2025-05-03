@@ -98,7 +98,7 @@ const Features = () => {
           <div className="flex flex-col md:flex-row gap-8 items-center">
             <div className="md:w-1/2">
               <h3 className="text-2xl font-bold mb-4">
-                Why Startups Choose FeatureScribe
+                Why Startups Choose AdaptiDemo Labs
               </h3>
               <ul className="space-y-3">
                 {[
@@ -129,7 +129,7 @@ const Features = () => {
                   </div>
                 </div>
                 <blockquote className="text-gray-700 italic">
-                  "FeatureScribe has been a game-changer for our team. We used to spend days creating documentation for new features. Now, we just upload our demo videos and get professional documentation in minutes."
+                  "AdaptiDemo Labs has been a game-changer for our team. We used to spend days creating documentation for new features. Now, we just upload our demo videos and get professional documentation in minutes."
                 </blockquote>
               </div>
             </div>

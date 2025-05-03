@@ -3,6 +3,7 @@ import React from "react";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import Features from "@/components/Features";
+import ComingSoonFeatures from "@/components/ComingSoonFeatures";
 import UploadSection from "@/components/UploadSection";
 import DemoSection from "@/components/DemoSection";
 import Footer from "@/components/Footer";
@@ -19,6 +20,7 @@ const Index = () => {
         <Hero />
         <Features />
         <DemoSection />
+        <ComingSoonFeatures />
         <UploadSection />
       </main>
       <Footer />
