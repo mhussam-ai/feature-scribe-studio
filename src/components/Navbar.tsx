@@ -31,7 +31,7 @@ const Navbar = () => {
               />
             </svg>
           </div>
-          <span className="font-bold text-xl">FeatureScribe</span>
+          <span className="font-bold text-xl">AdaptiDemo Labs</span>
         </Link>
 
         {/* Desktop Menu */}

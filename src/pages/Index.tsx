@@ -8,6 +8,10 @@ import DemoSection from "@/components/DemoSection";
 import Footer from "@/components/Footer";
 
 const Index = () => {
+  React.useEffect(() => {
+    document.title = "AdaptiDemo Labs - Turn UI Videos into Documentation";
+  }, []);
+  
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />

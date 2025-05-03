@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Chrome } from "lucide-react";
 
 const Hero = () => {
   return (
@@ -37,6 +37,9 @@ const Hero = () => {
               <Button variant="outline" className="text-base">
                 Watch Demo
               </Button>
+              <Button variant="secondary" className="text-base flex items-center gap-2">
+                <Chrome className="w-5 h-5" /> Chrome Extension
+              </Button>
             </div>
             
             <div className="flex items-center space-x-4 text-sm text-gray-500">
@@ -51,7 +54,7 @@ const Hero = () => {
                   <span className="text-xs font-medium text-purple-800">TM</span>
                 </div>
               </div>
-              <p>Join <span className="font-medium">200+</span> startups already using FeatureScribe</p>
+              <p>Join <span className="font-medium">200+</span> startups already using AdaptiDemo Labs</p>
             </div>
           </div>
           
