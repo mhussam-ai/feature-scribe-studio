@@ -235,55 +235,6 @@ const UploadSection = () => {
                   </Button>
                 </div>
 
-                {/* Prompt Input */}
-                <div className="mt-6 mb-4 text-left max-w-md mx-auto">
-                  <Label htmlFor="prompt" className="text-sm font-medium text-gray-700">
-                    Prompt (Optional)
-                  </Label>
-                  <Input
-                    id="prompt"
-                    type="text"
-                    placeholder="e.g., Focus on the new checkout flow"
-                    value={prompt}
-                    onChange={(e) => setPrompt(e.target.value)}
-                    className="mt-1"
-                  />
-                </div>
-
-                {/* Persona Dropdown */}
-                <div className="mb-6 text-left max-w-md mx-auto">
-                  <Label htmlFor="persona" className="text-sm font-medium text-gray-700">
-                    Select Persona
-                  </Label>
-                  <Select value={persona} onValueChange={setPersona}>
-                    <SelectTrigger id="persona" className="mt-1">
-                      <SelectValue placeholder="Select a persona" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="product manager">Product Manager</SelectItem>
-                      <SelectItem value="marketer">Marketer</SelectItem>
-                      <SelectItem value="customer success">Customer Success</SelectItem>
-                      <SelectItem value="sales">Sales</SelectItem>
-                      <SelectItem value="developer">Developer</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Company Website Input */}
-                <div className="mb-6 text-left max-w-md mx-auto">
-                  <Label htmlFor="companyWebsite" className="text-sm font-medium text-gray-700">
-                    Company Website URL (Optional)
-                  </Label>
-                  <Input
-                    id="companyWebsite"
-                    type="url"
-                    placeholder="e.g., https://example.com"
-                    value={companyWebsite}
-                    onChange={(e) => setCompanyWebsite(e.target.value)}
-                    className="mt-1"
-                  />
-                </div>
-
                 <input
                   id="videoInput"
                   type="file"
@@ -315,11 +266,67 @@ const UploadSection = () => {
                 <p className="text-gray-500 mb-4">
                   {(file.size / 1024 / 1024).toFixed(2)} MB
                 </p>
+
+                {/* Form Fields - Moved here */}
+                <div className="mt-6 mb-4 text-left max-w-md mx-auto space-y-4">
+                  <div>
+                    <Label htmlFor="prompt" className="text-sm font-medium text-gray-700">
+                      Prompt (Optional)
+                    </Label>
+                    <Input
+                      id="prompt"
+                      type="text"
+                      placeholder="e.g., Focus on the new checkout flow"
+                      value={prompt}
+                      onChange={(e) => setPrompt(e.target.value)}
+                      className="mt-1"
+                      disabled={isUploading || (!!videoId && processingStatus !== "" && !processingStatus.startsWith("error"))} // Disable after upload starts
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="persona" className="text-sm font-medium text-gray-700">
+                      Select Persona
+                    </Label>
+                    <Select 
+                      value={persona} 
+                      onValueChange={setPersona}
+                      disabled={isUploading || (!!videoId && processingStatus !== "" && !processingStatus.startsWith("error"))} // Disable after upload starts
+                    >
+                      <SelectTrigger id="persona" className="mt-1">
+                        <SelectValue placeholder="Select a persona" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="product manager">Product Manager</SelectItem>
+                        <SelectItem value="marketer">Marketer</SelectItem>
+                        <SelectItem value="customer success">Customer Success</SelectItem>
+                        <SelectItem value="sales">Sales</SelectItem>
+                        <SelectItem value="developer">Developer</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="companyWebsite" className="text-sm font-medium text-gray-700">
+                      Company Website URL (Optional)
+                    </Label>
+                    <Input
+                      id="companyWebsite"
+                      type="url"
+                      placeholder="e.g., https://example.com"
+                      value={companyWebsite}
+                      onChange={(e) => setCompanyWebsite(e.target.value)}
+                      className="mt-1"
+                      disabled={isUploading || (!!videoId && processingStatus !== "" && !processingStatus.startsWith("error"))} // Disable after upload starts
+                    />
+                  </div>
+                </div>
                 
                 {videoId && processingStatus && (
                   <ProcessingStatus status={processingStatus} />
                 )}
                 
+                {/* Action Buttons - Appear after file selection and form fields */}
                 <div className="flex justify-center gap-4 mt-6">
                   <Button 
                     variant="outline"
