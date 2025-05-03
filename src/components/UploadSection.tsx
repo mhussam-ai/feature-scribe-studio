@@ -1,9 +1,18 @@
 
 import React, { useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { Upload, FileText, Image, Loader2, Download } from "lucide-react";
-import { 
+import {
   uploadVideo, 
   processVideo, 
   checkStatus, 
@@ -18,6 +27,10 @@ const UploadSection = () => {
   const [file, setFile] = useState<File | null>(null);
   const [videoId, setVideoId] = useState<string | null>(null);
   const [processingStatus, setProcessingStatus] = useState<string>("");
+  const [prompt, setPrompt] = useState<string>("");
+  const [persona, setPersona] = useState<string>("");
+  const [companyWebsite, setCompanyWebsite] = useState<string>(""); // Add state for company website
+  const [isRecording, setIsRecording] = useState(false); // State for screen recording
   const { toast } = useToast();
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -60,24 +73,29 @@ const UploadSection = () => {
     if (!file) return;
     
     setIsUploading(true);
-    setProcessingStatus("");
-    
-    try {
-      // Upload the file
-      const uploadResponse = await uploadVideo(file);
-      setVideoId(uploadResponse.video_id);
-      setProcessingStatus("uploaded");
-      
-      toast({
-        title: "Upload successful!",
-        description: "Starting document generation process...",
-      });
-      
-      // Start processing
-      await processVideo(uploadResponse.video_id);
-      
-      // Begin polling for status
-      checkProcessingStatus(uploadResponse.video_id);
+      setProcessingStatus("");
+
+      try {
+        // TODO: Pass prompt, persona, and company website to the backend
+        console.log("Prompt:", prompt);
+        console.log("Persona:", persona);
+        console.log("Company Website:", companyWebsite); // Log the new state
+
+        // Upload the file
+        const uploadResponse = await uploadVideo(file); // Modify API call if needed
+        setVideoId(uploadResponse.video_id);
+        setProcessingStatus("uploaded");
+
+        toast({
+          title: "Upload successful!",
+          description: "Starting document generation process...",
+        });
+
+        // Start processing
+        await processVideo(uploadResponse.video_id, prompt, persona); // Modify API call if needed
+
+        // Begin polling for status
+        checkProcessingStatus(uploadResponse.video_id);
       
     } catch (error) {
       console.error("Upload error:", error);
@@ -132,6 +150,30 @@ const UploadSection = () => {
     setProcessingStatus("");
   };
 
+  // Placeholder for screen recording logic
+  const handleScreenRecord = async () => {
+    setIsRecording(true);
+    toast({
+      title: "Screen Recording",
+      description: "Screen recording functionality not yet implemented.",
+    });
+    // TODO: Implement screen recording using navigator.mediaDevices.getDisplayMedia
+    // and MediaRecorder API
+    console.log("Attempting to start screen recording...");
+    // Example structure:
+    // try {
+    //   const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+    //   // ... use MediaRecorder to record the stream ...
+    //   // ... on stop, create a File object and call handleFile(recordedFile) ...
+    // } catch (err) {
+    //   console.error("Screen recording error:", err);
+    //   toast({ title: "Screen Recording Failed", description: err.message, variant: "destructive" });
+    // } finally {
+    //   setIsRecording(false);
+    // }
+    setIsRecording(false); // Remove this line once implemented
+  };
+
   return (
     <section id="upload" className="py-16 bg-gray-50">
       <div className="container-custom">
@@ -178,7 +220,70 @@ const UploadSection = () => {
                     <Image className="h-4 w-4" />
                     Upload Image
                   </Button>
+                  {/* Add Screen Record Button */}
+                  <Button 
+                    variant="outline"
+                    className="flex items-center gap-2"
+                    onClick={handleScreenRecord}
+                    disabled={isRecording} // Disable while recording
+                  >
+                    {/* You might want a specific icon for screen recording */}
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    Screen Record
+                  </Button>
                 </div>
+
+                {/* Prompt Input */}
+                <div className="mt-6 mb-4 text-left max-w-md mx-auto">
+                  <Label htmlFor="prompt" className="text-sm font-medium text-gray-700">
+                    Prompt (Optional)
+                  </Label>
+                  <Input
+                    id="prompt"
+                    type="text"
+                    placeholder="e.g., Focus on the new checkout flow"
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+
+                {/* Persona Dropdown */}
+                <div className="mb-6 text-left max-w-md mx-auto">
+                  <Label htmlFor="persona" className="text-sm font-medium text-gray-700">
+                    Select Persona
+                  </Label>
+                  <Select value={persona} onValueChange={setPersona}>
+                    <SelectTrigger id="persona" className="mt-1">
+                      <SelectValue placeholder="Select a persona" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="product manager">Product Manager</SelectItem>
+                      <SelectItem value="marketer">Marketer</SelectItem>
+                      <SelectItem value="customer success">Customer Success</SelectItem>
+                      <SelectItem value="sales">Sales</SelectItem>
+                      <SelectItem value="developer">Developer</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Company Website Input */}
+                <div className="mb-6 text-left max-w-md mx-auto">
+                  <Label htmlFor="companyWebsite" className="text-sm font-medium text-gray-700">
+                    Company Website URL (Optional)
+                  </Label>
+                  <Input
+                    id="companyWebsite"
+                    type="url"
+                    placeholder="e.g., https://example.com"
+                    value={companyWebsite}
+                    onChange={(e) => setCompanyWebsite(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+
                 <input
                   id="videoInput"
                   type="file"

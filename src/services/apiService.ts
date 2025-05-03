@@ -42,9 +42,21 @@ export const uploadVideo = async (file: File): Promise<UploadResponse> => {
 /**
  * Start processing a previously uploaded video
  */
-export const processVideo = async (videoId: string): Promise<ProcessResponse> => {
+export const processVideo = async (
+  videoId: string, 
+  prompt?: string, 
+  persona?: string
+): Promise<ProcessResponse> => {
+  const body: { prompt?: string; persona?: string } = {};
+  if (prompt) body.prompt = prompt;
+  if (persona) body.persona = persona;
+
   const response = await fetch(`${API_BASE_URL}/process/${videoId}`, {
     method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
   });
 
   if (!response.ok) {
