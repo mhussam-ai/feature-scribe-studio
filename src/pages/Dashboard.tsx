@@ -1,16 +1,16 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input"; // Import Input
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { UploadCloud, FileText, Image, Clock, CheckCircle, AlertCircle } from "lucide-react";
+import { UploadCloud, FileText, Image, Clock, CheckCircle, AlertCircle, Edit, Save, X, Loader2 } from "lucide-react"; // Import icons including Loader2
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Link, useNavigate } from "react-router-dom";
-import { checkStatus } from "@/services/apiService";
-import { useQuery } from "@tanstack/react-query";
-
-import { fetchDocsFolders } from "@/services/apiService";
+import { checkStatus, fetchDocsFolders, updateDocumentTitle } from "@/services/apiService"; // Import updateDocumentTitle
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"; // Import mutation hooks
+import { useToast } from "@/components/ui/use-toast"; // Import useToast
 
 // Fetch folders from the backend API
 const fetchDocuments = async () => {
@@ -159,8 +159,71 @@ interface DocumentCardProps {
 }
 
 const DocumentCard = ({ document }: DocumentCardProps) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedTitle, setEditedTitle] = useState(document.title);
+  const queryClient = useQueryClient(); // Get query client instance
+  const { toast } = useToast(); // Get toast function
+
+  const { mutate: saveTitle, isPending: isSaving } = useMutation({
+    mutationFn: (newTitle: string) => updateDocumentTitle(document.id, newTitle),
+    onSuccess: () => {
+      // Invalidate the documents query to refetch data with the new title
+      queryClient.invalidateQueries({ queryKey: ['documents'] });
+      setIsEditing(false); // Exit editing mode on success
+      toast({
+        title: "Title Updated",
+        description: `Document title saved successfully.`,
+      });
+    },
+    onError: (error) => {
+      console.error("Failed to update title:", error);
+      setIsEditing(false); // Optionally exit editing mode on error too, or keep it open
+      toast({
+        title: "Update Failed",
+        description: error instanceof Error ? error.message : "Could not save the new title.",
+        variant: "destructive",
+      });
+      // Optionally reset editedTitle back to original document.title here if desired
+      // setEditedTitle(document.title);
+    },
+  });
+
+
+  const handleEditClick = () => {
+    setEditedTitle(document.title); // Reset to original title on edit start
+    setIsEditing(true);
+  };
+
+  const handleCancelClick = () => {
+    setIsEditing(false);
+    // No need to reset editedTitle here, it resets on next edit click
+  };
+
+  const handleSaveClick = () => {
+    if (editedTitle.trim() === document.title) {
+      // No change, just cancel editing
+      setIsEditing(false);
+      return;
+    }
+    if (editedTitle.trim() === "") {
+      toast({
+        title: "Invalid Title",
+        description: "Title cannot be empty.",
+        variant: "destructive",
+      });
+      return;
+    }
+    saveTitle(editedTitle.trim());
+  };
+
+  // Prevent card click navigating when clicking edit/save/cancel buttons
+  const stopPropagation = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
+
   return (
-    <Card className="overflow-hidden hover:shadow-md transition-shadow duration-300">
+    <Card className="overflow-hidden hover:shadow-md transition-shadow duration-300 flex flex-col">
       <div className="aspect-video bg-gray-100 relative">
         <img 
           src={document.preview} 
@@ -199,12 +262,38 @@ const DocumentCard = ({ document }: DocumentCardProps) => {
           )}
         </div>
       </div>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg">{document.title}</CardTitle>
+      <CardHeader className="pb-2 flex-grow">
+        {isEditing ? (
+          <div className="flex items-center gap-2" onClick={stopPropagation}>
+            <Input
+              value={editedTitle}
+              onChange={(e) => setEditedTitle(e.target.value)}
+              className="h-8 text-lg flex-grow" // Match title size roughly, allow grow
+              autoFocus
+              onKeyDown={(e) => { if (e.key === 'Enter') handleSaveClick(); if (e.key === 'Escape') handleCancelClick(); }}
+              disabled={isSaving} // Disable input while saving
+            />
+            <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0" onClick={handleSaveClick} disabled={isSaving}>
+              {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+            </Button>
+            <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0" onClick={handleCancelClick} disabled={isSaving}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between gap-2">
+            <CardTitle className="text-lg truncate flex-grow">{document.title}</CardTitle>
+            {document.status === "completed" && !isSaving && ( // Only allow editing completed docs & not currently saving
+              <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0" onClick={(e) => { stopPropagation(e); handleEditClick(); }}>
+                <Edit className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        )}
         <CardDescription>{document.date}</CardDescription>
       </CardHeader>
-      <CardContent>
-        <Button 
+      <CardContent className="pt-2"> {/* Reduced top padding */}
+        <Button
           variant={document.status === "completed" ? "default" : "outline"}
           className="w-full"
           disabled={document.status !== "completed"}
