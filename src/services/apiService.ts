@@ -134,6 +134,30 @@ export const checkStatus = async (videoId: string): Promise<StatusResponse> => {
 };
 
 /**
+ * Update the title of a document (Placeholder for backend endpoint)
+ */
+export const updateDocumentTitle = async (videoId: string, newTitle: string): Promise<void> => {
+  // TODO: Replace with actual API endpoint when available
+  const response = await fetch(`${API_BASE_URL}/api/docs/${videoId}/update-title`, { // Hypothetical endpoint
+    method: "PATCH", // Or POST, depending on backend implementation
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ title: newTitle }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    // Handle specific errors if needed (e.g., 404 Not Found, 400 Bad Request)
+    throw new Error(`Failed to update document title: ${errorText || response.statusText}`);
+  }
+
+  // No content expected on success, or handle response if backend sends one
+  console.log(`Successfully sent update request for title of ${videoId}`);
+};
+
+
+/**
  * Get the download URL for a processed document
  */
 export const getDocumentDownloadUrl = (videoId: string): string => {
