@@ -207,7 +207,7 @@ const DocumentCard = ({ document }: DocumentCardProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(document.title);
   const { color: statusBorderColor, bgColor: statusBgColor, textColor: statusTextColor, Icon: StatusIcon } = getStatusAttributes(document.status);
-  const queryClient = useQueryClient(); // Get query client instance
+  const queryClient = useQueryClient();
   const { toast } = useToast(); // Get toast function
 
   const { mutate: saveTitle, isPending: isSaving } = useMutation({
@@ -268,19 +268,33 @@ const DocumentCard = ({ document }: DocumentCardProps) => {
   };
 
 
+  // Construct the thumbnail URL based on the document ID and expected path
+  // Assuming keyframes are JPGs and we want the first one.
+  // Adjust the base path and filename if necessary based on actual backend setup.
+  const thumbnailUrl = `/${document.id}/output/keyframes/keyframe_001.jpg`; 
+
   return (
     // Added status border color and slightly increased hover shadow
     <Card className={`overflow-hidden hover:shadow-lg transition-shadow duration-300 flex flex-col border-l-4 ${statusBorderColor}`}>
       <div className="aspect-video bg-slate-100 relative flex items-center justify-center"> {/* Centered placeholder */}
-        {document.preview ? (
-          <img 
-            src={document.preview} 
-            alt={document.title} 
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <ImageIcon className="h-16 w-16 text-slate-300" /> // Placeholder icon
-        )}
+        {/* Use the dynamically constructed thumbnail URL */}
+        <img 
+          // Use thumbnailUrl, provide a fallback or placeholder logic if needed
+          src={thumbnailUrl} 
+          alt={`Preview for ${document.title}`} 
+          className="w-full h-full object-cover"
+          // Add error handling for the image if the path is incorrect or image missing
+          onError={(e) => {
+            // Replace with a placeholder icon if the image fails to load
+            const target = e.target as HTMLImageElement;
+            target.onerror = null; // Prevent infinite loop if placeholder also fails
+            // Option 1: Hide the image element (if parent handles centering)
+            // target.style.display = 'none'; 
+            // Option 2: Replace src with a placeholder SVG or keep the background
+             target.src = '/placeholder.svg'; // Make sure placeholder.svg exists in public
+             target.classList.add('p-4', 'object-contain'); // Adjust styling for placeholder
+          }}
+        />
         {/* Type Badge - Adjusted styling */}
         <div className="absolute top-2 right-2">
           {document.type === "video" ? (
