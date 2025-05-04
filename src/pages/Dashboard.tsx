@@ -1,9 +1,10 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input"; // Import Input
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { UploadCloud, FileText, Image, Clock, CheckCircle, AlertCircle } from "lucide-react";
+import { UploadCloud, FileText, Image, Clock, CheckCircle, AlertCircle, Edit, Save, X } from "lucide-react"; // Import icons
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Link, useNavigate } from "react-router-dom";
@@ -159,8 +160,40 @@ interface DocumentCardProps {
 }
 
 const DocumentCard = ({ document }: DocumentCardProps) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedTitle, setEditedTitle] = useState(document.title);
+
+  const handleEditClick = () => {
+    setEditedTitle(document.title); // Reset to original title on edit start
+    setIsEditing(true);
+  };
+
+  const handleCancelClick = () => {
+    setIsEditing(false);
+    // No need to reset editedTitle here, it resets on next edit click
+  };
+
+  const handleSaveClick = () => {
+    // TODO: Implement API call to save the editedTitle
+    console.log(`Saving new title for ${document.id}: ${editedTitle}`);
+    // For now, just exit editing mode. Ideally, update would happen via query invalidation after API success.
+    // To simulate optimistic update (or just reflect change locally until backend is ready):
+    // You might want to update the document object passed in or refetch.
+    // For simplicity here, we just exit edit mode. The title will revert visually
+    // until the backend provides the updated title on next fetch.
+    setIsEditing(false);
+    // If you had a way to update the parent's state or refetch:
+    // updateDocumentTitle(document.id, editedTitle);
+  };
+
+  // Prevent card click navigating when clicking edit/save/cancel buttons
+  const stopPropagation = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
+
   return (
-    <Card className="overflow-hidden hover:shadow-md transition-shadow duration-300">
+    <Card className="overflow-hidden hover:shadow-md transition-shadow duration-300 flex flex-col">
       <div className="aspect-video bg-gray-100 relative">
         <img 
           src={document.preview} 
@@ -199,12 +232,37 @@ const DocumentCard = ({ document }: DocumentCardProps) => {
           )}
         </div>
       </div>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg">{document.title}</CardTitle>
+      <CardHeader className="pb-2 flex-grow">
+        {isEditing ? (
+          <div className="flex items-center gap-2" onClick={stopPropagation}>
+            <Input
+              value={editedTitle}
+              onChange={(e) => setEditedTitle(e.target.value)}
+              className="h-8 text-lg" // Match title size roughly
+              autoFocus
+              onKeyDown={(e) => { if (e.key === 'Enter') handleSaveClick(); if (e.key === 'Escape') handleCancelClick(); }}
+            />
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleSaveClick}>
+              <Save className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleCancelClick}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg">{document.title}</CardTitle>
+            {document.status === "completed" && ( // Only allow editing completed docs? Or adjust as needed
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => { stopPropagation(e); handleEditClick(); }}>
+                <Edit className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        )}
         <CardDescription>{document.date}</CardDescription>
       </CardHeader>
-      <CardContent>
-        <Button 
+      <CardContent className="pt-2"> {/* Reduced top padding */}
+        <Button
           variant={document.status === "completed" ? "default" : "outline"}
           className="w-full"
           disabled={document.status !== "completed"}
