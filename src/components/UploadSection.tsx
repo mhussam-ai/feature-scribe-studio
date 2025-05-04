@@ -18,7 +18,9 @@ import {
   checkStatus, 
   getDocumentDownloadUrl,
   createPresentation,
-  getPresentationDownloadUrl
+  getPresentationDownloadUrl,
+  startScreenRecord,
+  stopScreenRecord
 } from "@/services/apiService";
 import ProcessingStatus from "./ProcessingStatus";
 import { Link } from "react-router-dom";
@@ -178,15 +180,85 @@ const UploadSection = () => {
     }
   };
 
+  // --- Screen Recording Integration ---
+  const [recordingId, setRecordingId] = useState<string | null>(null);
+  const [recordingOutputPath, setRecordingOutputPath] = useState<string | null>(null);
+
   const handleScreenRecord = async () => {
-    setIsRecording(true);
-    toast({
-      title: "Screen Recording",
-      description: "Screen recording functionality not yet implemented.",
-    });
-    console.log("Attempting to start screen recording...");
-    setIsRecording(false);
+    if (!isRecording) {
+      // Start recording
+      setIsRecording(true);
+      toast({
+        title: "Screen Recording",
+        description: "Starting screen recording...",
+      });
+      try {
+        // TODO: Refactor apiService types for screen record endpoints
+        const resp = await startScreenRecord(15) as { status: string; recording_id: string; output_path: string };
+        setRecordingId(resp.recording_id);
+        setRecordingOutputPath(resp.output_path);
+        toast({
+          title: "Recording Started",
+          description: `Recording file: ${resp.recording_id}`,
+        });
+      } catch (err: unknown) {
+        setIsRecording(false);
+        // LINT: Use 'unknown' and check instanceof Error for type safety
+        toast({
+          title: "Recording Failed",
+          description: err instanceof Error ? err.message : "Could not start recording.",
+          variant: "destructive",
+        });
+      }
+    } else {
+      // Stop recording
+      toast({
+        title: "Screen Recording",
+        description: "Stopping screen recording...",
+      });
+      try {
+        // TODO: Refactor apiService types for screen record endpoints
+        const resp = await stopScreenRecord() as { status: string; output_path: string; recording_id: string };
+        setIsRecording(false);
+        setRecordingId(null);
+        setRecordingOutputPath(null);
+        toast({
+          title: "Recording Stopped",
+          description: `Saved as: ${resp.recording_id}`,
+        });
+        // Use the mp4 filename to process the video in the pipeline
+        // Simulate a File object for uploadVideo
+        const mp4Path = resp.output_path;
+        const mp4Filename = resp.recording_id;
+        // Fetch the file from backend and upload as File
+        // We'll fetch as blob and create a File
+        const fileResp = await fetch(mp4Path);
+        if (!fileResp.ok) throw new Error("Failed to fetch recorded video");
+        const blob = await fileResp.blob();
+        const recordedFile = new File([blob], mp4Filename, { type: "video/mp4" });
+        setUploadType("video");
+        setFile(recordedFile);
+        setVideoId(null); // Reset pipeline
+        setProcessingStatus("");
+        toast({
+          title: "Recorded Video Ready",
+          description: "Processing the recorded video...",
+        });
+        // Now, upload and process as normal
+        await handleUpload();
+      } catch (err: unknown) {
+        setIsRecording(false);
+        // LINT: Use 'unknown' and check instanceof Error for type safety
+        toast({
+          title: "Stop Recording Failed",
+          description: err instanceof Error ? err.message : "Could not stop recording.",
+          variant: "destructive",
+        });
+      }
+    }
   };
+
+
 
   return (
     <section id="upload" className="py-16 bg-gray-50">
@@ -261,14 +333,13 @@ const UploadSection = () => {
                   </Button>
                   <Button
                     variant="outline"
-                    className="flex items-center gap-2 py-2 px-4 text-base hover:bg-gray-50"
+                    className={`flex items-center gap-2 py-2 px-4 text-base hover:bg-gray-50 ${isRecording ? 'bg-red-100 text-red-700' : ''}`}
                     onClick={handleScreenRecord}
-                    disabled={isRecording}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
-                    Screen Record
+                    {isRecording ? "Stop Recording" : "Screen Record"}
                   </Button>
                 </div>
 
