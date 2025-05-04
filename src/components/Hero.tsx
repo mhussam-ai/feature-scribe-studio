@@ -58,7 +58,7 @@ const Hero = () => {
                   <span className="text-xs font-medium text-purple-800">TM</span>
                 </div>
               </div>
-              <p>Join <span className="font-medium">x+</span> startups already using AdaptiDemo Labs</p>
+              <p>Join <span className="font-medium">100+</span> startups already using AdaptiDemo Labs</p>
             </div>
           </div>
           
