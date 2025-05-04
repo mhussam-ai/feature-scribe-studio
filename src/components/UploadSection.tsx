@@ -31,6 +31,7 @@ const UploadSection = () => {
   const [file, setFile] = useState<File | null>(null);
   const [videoId, setVideoId] = useState<string | null>(null);
   const [processingStatus, setProcessingStatus] = useState<string>("");
+  const [title, setTitle] = useState<string>("");
   const [prompt, setPrompt] = useState<string>("");
   const [persona, setPersona] = useState<string>("");
   const [companyWebsite, setCompanyWebsite] = useState<string>("");
@@ -76,6 +77,14 @@ const UploadSection = () => {
     }
   };
 
+  // Slugify helper
+  const slugify = (str: string) =>
+    str
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+
   const handleUpload = async () => {
     if (!file) return;
     
@@ -89,21 +98,25 @@ const UploadSection = () => {
       console.log("Company Website:", companyWebsite);
       console.log("Language:", deckLanguage);
 
-      const uploadResponse = await uploadVideo(file);
-      setVideoId(uploadResponse.video_id);
+      // Pass title to uploadVideo if supported (extend API as needed)
+      const slugTitle = slugify(title);
+      const uploadResponse = await uploadVideo(file, slugTitle);
+      setVideoId(slugTitle);
       setProcessingStatus("uploaded");
-
+      console.log("slug title:", slugTitle);
       toast({
         title: "Upload successful!",
         description: "Starting document generation process...",
       });
 
+      // Pass title to processVideo if supported (extend API as needed)
       await processVideo(
         uploadResponse.video_id, 
         prompt, 
         persona, 
         companyWebsite,
-        deckLanguage
+        deckLanguage,
+        title // add as last argument for backend to use as folder/output name
       );
 
       checkProcessingStatus(uploadResponse.video_id);
@@ -376,6 +389,20 @@ const UploadSection = () => {
                 </p>
 
                 <div className="mt-6 mb-6 text-left max-w-md mx-auto space-y-4">
+                  <div>
+                    <Label htmlFor="title" className="text-sm font-medium text-gray-700">
+                      Title Name
+                    </Label>
+                    <Input
+                      id="title"
+                      type="text"
+                      placeholder="e.g., Onboarding Walkthrough"
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      className="mt-1"
+                      disabled={isUploading || (!!videoId && processingStatus !== "" && !processingStatus.startsWith("error"))}
+                    />
+                  </div>
                   <div>
                     <Label htmlFor="prompt" className="text-sm font-medium text-gray-700">
                       Prompt (Optional)

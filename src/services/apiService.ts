@@ -73,9 +73,13 @@ export interface StatusResponse {
 /**
  * Upload a video file to the API
  */
-export const uploadVideo = async (file: File): Promise<UploadResponse> => {
+/**
+ * Upload a video file to the API, with optional title for folder naming
+ */
+export const uploadVideo = async (file: File, title?: string): Promise<UploadResponse> => {
   const formData = new FormData();
   formData.append("file", file);
+  if (title) formData.append("title", title);
 
   const response = await fetch(`${API_BASE_URL}/upload`, {
     method: "POST",
@@ -122,24 +126,30 @@ export const stopScreenRecord = async (): Promise<{status: string; output_path: 
 /**
  * Start processing a previously uploaded video
  */
+/**
+ * Start processing a previously uploaded video, with optional title for output folder
+ */
 export const processVideo = async (
   videoId: string, 
   prompt?: string, 
   persona?: string,
   companyWebsite?: string,
-  language?: string  // Add language parameter
+  language?: string,  // Add language parameter
+  title?: string      // Add title for output folder
 ): Promise<ProcessResponse> => {
   const body: { 
     prompt?: string; 
     persona?: string;
     companyWebsite?: string;
-    language?: string;  // Add to request body
+    language?: string;
+    title?: string; // Add to request body
   } = {};
   
   if (prompt) body.prompt = prompt;
   if (persona) body.persona = persona;
   if (companyWebsite) body.companyWebsite = companyWebsite;
-  if (language) body.language = language;  // Include language in body
+  if (language) body.language = language;
+  if (title) body.title = title;
 
   const response = await fetch(`${API_BASE_URL}/process/${videoId}`, {
     method: "POST",
