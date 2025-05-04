@@ -13,6 +13,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import ReactMarkdown from 'react-markdown'; // Ensure ReactMarkdown is imported
 import remarkGfm from 'remark-gfm'; // Import remark-gfm
+import rehypeRaw from 'rehype-raw'; // Import rehype-raw
 
 interface DocNode {
   name: string;
@@ -22,7 +23,10 @@ interface DocNode {
 }
 
 const fetchMarkdownContent = async (videoId: string, filePath: string): Promise<string> => {
-  const response = await fetch(getMarkdownFileUrl(videoId, filePath));
+  const url = `${getMarkdownFileUrl(videoId, filePath)}?t=${Date.now()}`; // Add timestamp for cache busting
+  const response = await fetch(url, {
+    cache: 'no-store', // Use no-store for stronger cache prevention
+  });
   if (!response.ok) {
     throw new Error("Failed to fetch markdown file");
   }
@@ -296,7 +300,7 @@ const DocumentView = () => {
                       ) : markdownContent ? (
                         // Added prose-sm for smaller base font, adjusted styles
                         <div className="prose prose-sm prose-blue max-w-none prose-headings:font-semibold prose-a:text-blue-600 hover:prose-a:text-blue-800 prose-code:before:content-none prose-code:after:content-none prose-code:px-1 prose-code:py-0.5 prose-code:bg-gray-100 prose-code:rounded">
-                          <ReactMarkdown remarkPlugins={[remarkGfm]}>{markdownContent}</ReactMarkdown> 
+                          <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>{markdownContent}</ReactMarkdown> 
                         </div>
                       ) : (
                          <div className="text-center py-12 text-gray-500">Select a file from the sidebar to view its content.</div>
