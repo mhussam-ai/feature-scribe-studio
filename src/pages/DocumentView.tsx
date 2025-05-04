@@ -4,14 +4,14 @@ import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChevronLeft, Download, FileText, Copy, CheckCircle, Share2, Loader2 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // Added Card components
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable"; // Added Resizable components
+import { ChevronLeft, Download, FileText, Copy, CheckCircle, Share2, Loader2, Folder, PanelLeftClose, PanelLeftOpen } from "lucide-react"; // Added Folder, Panel icons
 import { Link, useParams } from "react-router-dom";
 import { getMarkdownFileUrl, listDocsDirectory, getDocumentDownloadUrl } from "@/services/apiService";
 import { useToast } from "@/components/ui/use-toast";
 import { useQuery } from "@tanstack/react-query";
-
-// Markdown parser dependency will be added
-import ReactMarkdown from 'react-markdown';
+import ReactMarkdown from 'react-markdown'; // Ensure ReactMarkdown is imported
 
 interface DocNode {
   name: string;
@@ -38,6 +38,7 @@ const DocumentView = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false); // State for sidebar collapse
 
   // Fetch folder/file tree on mount
   useEffect(() => {
@@ -102,23 +103,32 @@ const DocumentView = () => {
     }
   };
 
-  // Recursive sidebar tree
-  const renderTree = (nodes: DocNode[]) => (
-    <ul className="pl-2">
+  // Recursive sidebar tree with improved styling
+  const renderTree = (nodes: DocNode[], level = 0) => (
+    <ul className={level > 0 ? "pl-4" : ""}>
       {nodes.map((node) => (
-        <li key={node.path} className="mb-1">
+        <li key={node.path} className="my-0.5">
           {node.type === 'file' ? (
             <button
-              className={`text-left text-blue-700 hover:underline ${selectedFile === node.path ? 'font-bold underline' : ''}`}
+              className={`flex items-center w-full text-left px-2 py-1 rounded-md text-sm transition-colors duration-150 ${
+                selectedFile === node.path
+                  ? 'bg-blue-100 text-blue-800 font-medium'
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
               onClick={() => setSelectedFile(node.path)}
+              title={node.path}
             >
-              {node.name}
+              <FileText className="h-4 w-4 mr-2 flex-shrink-0 text-gray-500" />
+              <span className="truncate">{node.name}</span>
             </button>
           ) : (
-            <>
-              <span className="font-semibold">{node.name}</span>
-              {node.children && renderTree(node.children)}
-            </>
+            <div className="mt-1">
+              <div className="flex items-center px-2 py-1 text-sm font-medium text-gray-800">
+                 <Folder className="h-4 w-4 mr-2 flex-shrink-0 text-yellow-600" />
+                 <span className="truncate">{node.name}</span>
+              </div>
+              {node.children && renderTree(node.children, level + 1)}
+            </div>
           )}
         </li>
       ))}
@@ -130,132 +140,200 @@ const DocumentView = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gray-100">
       <Navbar />
       
-      <div className="flex-grow bg-gray-50 py-8">
-        <div className="container-custom">
-          <div className="mb-6">
-            <Link to="/dashboard" className="flex items-center text-gray-600 hover:text-gray-900 mb-4">
-              <ChevronLeft className="h-4 w-4 mr-1" /> Back to Dashboard
-            </Link>
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <h1 className="text-3xl font-bold">Generated Documentation</h1>
-                <p className="text-gray-600">Document ID: {id}</p>
-              </div>
-              <div className="flex flex-wrap gap-3">
-                <Button 
-                  variant="outline" 
-                  className="flex items-center gap-1"
-                  onClick={handleCopy}
-                  disabled={isLoading || isError}
-                >
-                  {copied ? (
-                    <CheckCircle className="h-4 w-4" />
-                  ) : (
-                    <Copy className="h-4 w-4" />
-                  )}
-                  {copied ? "Copied" : "Copy"}
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="flex items-center gap-1"
-                  disabled={isLoading || isError}
-                  asChild
-                >
-                  <a href={getDocumentDownloadUrl(id)} download>
-                    <Download className="h-4 w-4" /> Export
-                  </a>
-                </Button>
-                <Button 
-                  className="flex items-center gap-1"
-                  disabled={isLoading || isError}
-                >
-                  <Share2 className="h-4 w-4" /> Share
-                </Button>
-              </div>
+      <div className="flex-grow container-custom py-6 flex flex-col">
+        {/* Header Section */}
+        <div className="mb-4">
+          <Link to="/dashboard" className="flex items-center text-sm text-gray-600 hover:text-gray-900 mb-2">
+            <ChevronLeft className="h-4 w-4 mr-1" /> Back to Dashboard
+          </Link>
+          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-800">Generated Documentation</h1>
+              <p className="text-xs text-gray-500 mt-0.5">Document ID: {id}</p>
             </div>
+             {/* Moved Sidebar Toggle here */}
+             <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                className="sm:hidden" // Only show on small screens initially, adjust as needed
+              >
+                {isSidebarCollapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+              </Button>
           </div>
-                   <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            {/* Sidebar with file/folder tree */}
-            <div className="col-span-1">
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 h-full">
-                <h3 className="text-lg font-medium mb-4">Documentation Files</h3>
-                {tree ? renderTree(tree) : <div>Loading file tree...</div>}
-              </div>
-            </div>
-            {/* Main content area */}
-            <div className="col-span-1 md:col-span-3">
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex gap-2">
+        </div>
+
+        {/* Main Content Area with Resizable Panels */}
+        <ResizablePanelGroup 
+          direction="horizontal" 
+          className="flex-grow rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden"
+          autoSaveId={`doc-view-layout-${id}`} // Persist layout per document
+        >
+          {/* Sidebar Panel */}
+          <ResizablePanel 
+            defaultSize={25} 
+            minSize={15} 
+            maxSize={40} 
+            collapsible 
+            collapsedSize={0} // Completely hide when collapsed
+            onCollapse={() => setIsSidebarCollapsed(true)}
+            onExpand={() => setIsSidebarCollapsed(false)}
+            className={`transition-all duration-300 ease-in-out ${isSidebarCollapsed ? 'hidden' : ''}`} // Control visibility
+          >
+            <Card className="h-full border-0 border-r rounded-none shadow-none flex flex-col">
+              <CardHeader className="p-4 border-b">
+                <CardTitle className="text-base font-semibold flex items-center justify-between">
+                  Document Structure
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={() => setIsSidebarCollapsed(true)} 
+                    className="hidden sm:flex h-7 w-7" // Hide on small screens, show on larger
+                    title="Collapse Sidebar"
+                  >
+                    <PanelLeftClose className="h-4 w-4" />
+                  </Button>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-2 flex-grow overflow-y-auto">
+                {tree ? (
+                  renderTree(tree)
+                ) : (
+                  <div className="flex items-center justify-center h-full text-gray-500">
+                    <Loader2 className="h-5 w-5 mr-2 animate-spin" /> Loading...
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </ResizablePanel>
+
+          <ResizableHandle withHandle className="bg-gray-200 w-1.5 hover:bg-blue-500 transition-colors" />
+
+          {/* Content Panel */}
+          <ResizablePanel defaultSize={75} minSize={30}>
+            <Card className="h-full border-0 rounded-none shadow-none flex flex-col">
+              <CardHeader className="p-4 border-b flex flex-row items-center justify-between space-y-0">
+                 {/* Expand Button when collapsed */}
+                 {isSidebarCollapsed && (
                     <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => setIsSidebarCollapsed(false)} 
+                      className="h-7 w-7 mr-2"
+                      title="Expand Sidebar"
+                    >
+                      <PanelLeftOpen className="h-4 w-4" />
+                    </Button>
+                  )}
+                <div className="flex-grow overflow-hidden mr-4">
+                   <CardTitle className="text-base font-semibold truncate" title={selectedFile || "Select a file"}>
+                    {selectedFile ? selectedFile.split('/').pop() : "Select a file"} 
+                  </CardTitle>
+                  <p className="text-xs text-gray-500 truncate" title={selectedFile}>{selectedFile || ""}</p>
+                </div>
+                {/* Action Buttons */}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                   <Button 
                       variant="outline" 
+                      size="sm"
                       className="flex items-center gap-1"
                       onClick={handleCopy}
-                      disabled={isLoading || isError}
+                      disabled={isLoading || isError || !markdownContent}
+                      title="Copy content to clipboard"
                     >
                       {copied ? <CheckCircle className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                      {copied ? "Copied" : "Copy"}
+                      <span className="hidden sm:inline">{copied ? "Copied" : "Copy"}</span>
                     </Button>
-                  </div>
-                  <div className="text-xs text-gray-400">{selectedFile}</div>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="flex items-center gap-1"
+                      disabled={isLoading || isError}
+                      asChild
+                      title="Download documentation bundle"
+                    >
+                      <a href={getDocumentDownloadUrl(id)} download>
+                        <Download className="h-4 w-4" /> <span className="hidden sm:inline">Export</span>
+                      </a>
+                    </Button>
+                    <Button 
+                      size="sm"
+                      className="flex items-center gap-1"
+                      disabled={isLoading || isError} // Add share functionality later
+                      title="Share document (coming soon)"
+                    >
+                      <Share2 className="h-4 w-4" /> <span className="hidden sm:inline">Share</span>
+                    </Button>
                 </div>
-                <Tabs defaultValue="document">
-                  <TabsList className="mb-6">
+              </CardHeader>
+              <CardContent className="p-0 flex-grow overflow-hidden">
+                {/* Tabs */}
+                <Tabs defaultValue="document" className="h-full flex flex-col">
+                  <TabsList className="mx-4 mt-4 mb-0 border-b-0 rounded-b-none">
                     <TabsTrigger value="document">Document</TabsTrigger>
                     <TabsTrigger value="markdown">Raw Markdown</TabsTrigger>
                   </TabsList>
-                  <TabsContent value="document" className="space-y-6 min-h-[400px]">
-                    {isLoading ? (
-                      <div className="flex items-center justify-center h-64">
-                        <div className="text-center">
-                          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
-                          <p>Loading documentation...</p>
+                  <div className="flex-grow overflow-y-auto p-6">
+                    <TabsContent value="document" className="mt-0 min-h-[300px]">
+                      {isLoading ? (
+                        <div className="flex items-center justify-center h-64">
+                          <div className="text-center text-gray-500">
+                            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
+                            <p>Loading documentation...</p>
+                          </div>
                         </div>
-                      </div>
-                    ) : isError ? (
-                      <div className="text-center py-12">
-                        <p className="text-red-500 mb-4">Failed to load document</p>
-                        <Button onClick={() => setSelectedFile(selectedFile)}>
-                          Try Again
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="prose prose-blue max-w-none">
-                        <ReactMarkdown>{markdownContent || ''}</ReactMarkdown>
-                      </div>
-                    )}
-                  </TabsContent>
-                  <TabsContent value="markdown" className="min-h-[400px]">
-                    {isLoading ? (
-                      <div className="flex items-center justify-center h-64">
-                        <div className="text-center">
-                          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
-                          <p>Loading markdown...</p>
+                      ) : isError ? (
+                        <div className="text-center py-12 text-red-600">
+                          <p className="mb-4">Failed to load document.</p>
+                          <Button size="sm" onClick={() => setSelectedFile(selectedFile)}>
+                            Try Again
+                          </Button>
                         </div>
-                      </div>
-                    ) : isError ? (
-                      <div className="text-center py-12">
-                        <p className="text-red-500 mb-4">Failed to load markdown</p>
-                        <Button onClick={() => setSelectedFile(selectedFile)}>
-                          Try Again
-                        </Button>
-                      </div>
-                    ) : (
-                      <pre className="bg-gray-100 rounded p-4 overflow-x-auto whitespace-pre-wrap text-xs">
-                        {markdownContent || ''}
-                      </pre>
-                    )}
-                  </TabsContent>
+                      ) : markdownContent ? (
+                        // Added prose-sm for smaller base font, adjusted styles
+                        <div className="prose prose-sm prose-blue max-w-none prose-headings:font-semibold prose-a:text-blue-600 hover:prose-a:text-blue-800 prose-code:before:content-none prose-code:after:content-none prose-code:px-1 prose-code:py-0.5 prose-code:bg-gray-100 prose-code:rounded">
+                          <ReactMarkdown>{markdownContent}</ReactMarkdown>
+                        </div>
+                      ) : (
+                         <div className="text-center py-12 text-gray-500">Select a file from the sidebar to view its content.</div>
+                      )}
+                    </TabsContent>
+                    <TabsContent value="markdown" className="mt-0 min-h-[300px]">
+                      {isLoading ? (
+                        <div className="flex items-center justify-center h-64">
+                           <div className="text-center text-gray-500">
+                            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
+                            <p>Loading markdown...</p>
+                          </div>
+                        </div>
+                      ) : isError ? (
+                         <div className="text-center py-12 text-red-600">
+                          <p className="mb-4">Failed to load markdown.</p>
+                          <Button size="sm" onClick={() => setSelectedFile(selectedFile)}>
+                            Try Again
+                          </Button>
+                        </div>
+                      ) : markdownContent ? (
+                        // Improved styling for raw markdown block
+                        <pre className="bg-gray-900 text-gray-100 rounded-md p-4 overflow-x-auto whitespace-pre-wrap text-xs font-mono leading-relaxed">
+                          {markdownContent}
+                        </pre>
+                      ) : (
+                         <div className="text-center py-12 text-gray-500">Select a file to view its raw markdown content.</div>
+                      )}
+                    </TabsContent>
+                  </div>
                 </Tabs>
-              </div>
-            </div>
-          </div>
-        </div>
+              </CardContent>
+            </Card>
+          </ResizablePanel>
+        </ResizablePanelGroup>
       </div>
       
+      {/* Footer remains outside the main resizable area */}
       <Footer />
     </div>
   );
