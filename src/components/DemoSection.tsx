@@ -34,17 +34,17 @@ const DemoSection = () => {
 
         <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="bg-gray-50 rounded-xl p-6">
-            <div className="text-blue-600 text-5xl font-bold mb-4">x%</div>
+            <div className="text-blue-600 text-5xl font-bold mb-4">93%</div>
             <p className="text-gray-800">Reduction in documentation time for new features</p>
           </div>
           
           <div className="bg-gray-50 rounded-xl p-6">
-            <div className="text-blue-600 text-5xl font-bold mb-4">x%</div>
+            <div className="text-blue-600 text-5xl font-bold mb-4">20%</div>
             <p className="text-gray-800">Uptick in lead funnel conversion</p>
           </div>
           
           <div className="bg-gray-50 rounded-xl p-6">
-            <div className="text-blue-600 text-5xl font-bold mb-4">x%</div>
+            <div className="text-blue-600 text-5xl font-bold mb-4">56%</div>
             <p className="text-gray-800">Improvement in customer onboarding success</p>
           </div>
         </div>
