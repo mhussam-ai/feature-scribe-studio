@@ -13,22 +13,15 @@ const DemoSection = () => {
         </div>
 
         <div className="max-w-5xl mx-auto rounded-2xl overflow-hidden shadow-xl relative">
-          {/* Video Thumbnail/Player would go here in production */}
-          <div className="aspect-video bg-gradient-to-tr from-gray-900 to-gray-700 flex items-center justify-center relative">
-            <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-500 to-transparent"></div>
-            
-            <Button className="h-16 w-16 rounded-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shadow-lg hover:scale-105 transition-transform duration-300" onClick={() => console.log("Play demo video")}>
-              <Play className="h-8 w-8 fill-current" />
-            </Button>
-            
-            <div className="absolute bottom-8 left-8">
-              <h3 className="text-white text-xl font-semibold mb-1">
-                From UI Demo to Documentation
-              </h3>
-              <p className="text-gray-300">
-                See our AI in action (2:45)
-              </p>
-            </div>
+          <div className="aspect-video">
+            <iframe
+              className="w-full h-full"
+              src="https://www.youtube.com/embed/Jk8AbWd5IuM"
+              title="YouTube video player"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            ></iframe>
           </div>
         </div>
 
