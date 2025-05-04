@@ -7,12 +7,53 @@
 const API_BASE_URL = "http://localhost:8000"; // Default FastAPI port
 
 /**
+ * Create a feature presentation for a video
+ */
+export const createPresentation = async (
+  videoId: string,
+  language?: string
+): Promise<{ presentation_path: string; download_url: string }> => {
+  const response = await fetch(`${API_BASE_URL}/create-presentation/${videoId}` + (language ? `?language=${encodeURIComponent(language)}` : ''), {
+    method: "POST"
+  });
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Presentation creation failed: ${errorText}`);
+  }
+  return await response.json();
+};
+
+/**
+ * Get the download URL for a processed presentation
+ */
+export const getPresentationDownloadUrl = (videoId: string): string => {
+  return `${API_BASE_URL}/download-presentation/${videoId}`;
+};
+
+/**
  * Fetch all documentation folders (video_ids) from the backend
  */
 export const fetchDocsFolders = async () => {
   const response = await fetch(`${API_BASE_URL}/fetch_api/docs-folders`);
   if (!response.ok) {
     throw new Error("Failed to fetch documentation folders");
+  }
+  return await response.json();
+};
+
+/**
+ * Decide localization/personalization needs using OpenAI gpt-4o-mini via backend
+ */
+export const shouldLocalize = async (prompt: string, persona: string) => {
+  const response = await fetch(`${API_BASE_URL}/api/should-localize`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ prompt, persona }),
+  });
+  if (!response.ok) {
+    throw new Error("Failed to analyze localization/personalization");
   }
   return await response.json();
 };

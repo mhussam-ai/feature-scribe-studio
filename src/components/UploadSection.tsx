@@ -17,7 +17,9 @@ import {
   uploadVideo,
   processVideo, 
   checkStatus, 
-  getDocumentDownloadUrl 
+  getDocumentDownloadUrl,
+  createPresentation,
+  getPresentationDownloadUrl
 } from "@/services/apiService";
 import ProcessingStatus from "./ProcessingStatus";
 import { Link } from "react-router-dom";
@@ -33,6 +35,9 @@ const UploadSection = () => {
   const [companyWebsite, setCompanyWebsite] = useState<string>("");
   const [isRecording, setIsRecording] = useState(false);
   const [buildTarget, setBuildTarget] = useState<"user guide" | "deck">("user guide"); // Added state for build target
+  const [deckStatus, setDeckStatus] = useState<"idle" | "generating" | "ready" | "error">("idle");
+  const [deckDownloadUrl, setDeckDownloadUrl] = useState<string>("");
+  const [deckLanguage, setDeckLanguage] = useState<string>("English");
   const { toast } = useToast();
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -120,20 +125,20 @@ const UploadSection = () => {
           !statusResponse.status.startsWith("error")) {
         // Continue polling every 3 seconds until done or error
         setTimeout(() => checkProcessingStatus(id), 3000);
-      } else {
-        setIsUploading(false);
-        if (statusResponse.status === "done") {
-          toast({
-            title: "Success!",
-            description: "Your documentation has been generated successfully.",
-          });
-        } else if (statusResponse.status.startsWith("error")) {
-          toast({
-            title: "Processing Error",
-            description: statusResponse.status.replace("error: ", ""),
-            variant: "destructive",
-          });
-        }
+      } else if (statusResponse.status === "done" && buildTarget === "deck" && deckStatus === "idle") {
+        // Automatically trigger deck generation if needed
+        handleCreateDeck(id);
+      } else if (statusResponse.status === "done") {
+        toast({
+          title: "Success!",
+          description: "Your documentation has been generated successfully.",
+        });
+      } else if (statusResponse.status.startsWith("error")) {
+        toast({
+          title: "Processing Error",
+          description: statusResponse.status.replace("error: ", ""),
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error("Status check error:", error);
@@ -386,6 +391,61 @@ const UploadSection = () => {
                         </>
                       )}
                     </Button>
+                  ) : processingStatus === "done" && buildTarget === "deck" ? (
+                    <div className="flex flex-col items-center gap-4">
+                      <div className="w-full flex flex-col sm:flex-row items-center gap-2">
+                        <Label htmlFor="deck-language" className="text-sm font-medium">Deck Language:</Label>
+                        <Select
+                          value={deckLanguage}
+                          onValueChange={setDeckLanguage}
+                          id="deck-language"
+                        >
+                          <SelectTrigger className="w-48">
+                            <SelectValue placeholder="Language" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="English">English</SelectItem>
+                            <SelectItem value="Spanish">Spanish</SelectItem>
+                            <SelectItem value="French">French</SelectItem>
+                            <SelectItem value="German">German</SelectItem>
+                            <SelectItem value="Chinese">Chinese</SelectItem>
+                            <SelectItem value="Japanese">Japanese</SelectItem>
+                            <SelectItem value="Other">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          className="flex items-center gap-2"
+                          onClick={() => handleCreateDeck(videoId!)}
+                          disabled={deckStatus === "generating"}
+                        >
+                          {deckStatus === "generating" ? (
+                            <>
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                              Generating Deck...
+                            </>
+                          ) : (
+                            <>
+                              <Download className="h-4 w-4" />
+                              Generate Deck
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                      {deckStatus === "ready" && (
+                        <Button
+                          className="flex items-center gap-2"
+                          asChild
+                        >
+                          <a href={deckDownloadUrl} target="_blank" rel="noopener noreferrer">
+                            <Download className="h-4 w-4" />
+                            Download Deck
+                          </a>
+                        </Button>
+                      )}
+                      {deckStatus === "error" && (
+                        <div className="text-red-600 text-sm">Deck generation failed. Try again.</div>
+                      )}
+                    </div>
                   ) : processingStatus === "done" ? (
                     <Button 
                       className="flex items-center gap-2"

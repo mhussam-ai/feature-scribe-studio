@@ -15,16 +15,35 @@ const ProcessingStatus = ({ status }: ProcessingStatusProps) => {
         return 10;
       case "processing":
       case "extracting_audio":
-        return 25;
+        return 20;
       case "transcribing":
-        return 50;
+        return 30;
       case "extracting_keyframes":
-        return 75;
+        return 50;
+      case "consolidating_user_journey":
+        return 80;
+      case "generating_documentation_folder_structure":
+        return 85;
+      case "creating_markdown_skeletons":
+        return 90;
+      case "populating_documentation_files":
+        return 95;
       case "generating_documentation":
         return 90;
       case "done":
         return 100;
       default:
+        // Support progress for analyzing_keyframes: X/Y
+        if (status && status.startsWith("analyzing_keyframes")) {
+          const match = status.match(/analyzing_keyframes: (\d+)[/](\d+)/);
+          if (match) {
+            const current = parseInt(match[1], 10);
+            const total = parseInt(match[2], 10);
+            if (total > 0) {
+              return Math.floor(50 + (current / total) * 30); // Between 75 and 85%
+            }
+          }
+        }
         return 0;
     }
   };
@@ -41,6 +60,14 @@ const ProcessingStatus = ({ status }: ProcessingStatusProps) => {
         return "Transcribing Audio";
       case "extracting_keyframes":
         return "Extracting Key Frames";
+      case "consolidating_user_journey":
+        return "Consolidating User Journey";
+      case "generating_documentation_folder_structure":
+        return "Generating Documentation Folder Structure";
+      case "creating_markdown_skeletons":
+        return "Creating Markdown Skeletons";
+      case "populating_documentation_files":
+        return "Populating Documentation Files";
       case "generating_documentation":
         return "Generating Documentation";
       case "done":
@@ -48,6 +75,15 @@ const ProcessingStatus = ({ status }: ProcessingStatusProps) => {
       case "not_found":
         return "File Not Found";
       default:
+        if (status && status.startsWith("analyzing_keyframes")) {
+          const match = status.match(/analyzing_keyframes: (\d+)[/](\d+)/);
+          if (match) {
+            const current = parseInt(match[1], 10);
+            const total = parseInt(match[2], 10);
+            return `Analyzing Keyframes (${current}/${total})`;
+          }
+          return "Analyzing Keyframes";
+        }
         if (status && status.startsWith("error")) {
           return `Error: ${status.replace("error: ", "")}`;
         }
