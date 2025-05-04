@@ -127,7 +127,7 @@ const UploadSection = () => {
         setTimeout(() => checkProcessingStatus(id), 3000);
       } else if (statusResponse.status === "done" && buildTarget === "deck" && deckStatus === "idle") {
         // Automatically trigger deck generation if needed
-        handleCreateDeck(id);
+        await handleCreateDeck(id);
       } else if (statusResponse.status === "done") {
         toast({
           title: "Success!",
@@ -156,6 +156,28 @@ const UploadSection = () => {
     setUploadType(null);
     setVideoId(null);
     setProcessingStatus("");
+  };
+
+  // Create deck presentation for a video
+  const handleCreateDeck = async (id: string) => {
+    setDeckStatus("generating");
+    try {
+      const language = deckLanguage || "English";
+      const response = await createPresentation(id, language);
+      setDeckDownloadUrl(response.download_url);
+      setDeckStatus("ready");
+      toast({
+        title: "Deck generated!",
+        description: "You can now download your presentation deck.",
+      });
+    } catch (error: any) {
+      setDeckStatus("error");
+      toast({
+        title: "Deck generation failed",
+        description: error instanceof Error ? error.message : "An unknown error occurred",
+        variant: "destructive",
+      });
+    }
   };
 
   // Placeholder for screen recording logic
