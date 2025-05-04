@@ -37,7 +37,7 @@ const UploadSection = () => {
   const [buildTarget, setBuildTarget] = useState<"user guide" | "deck">("user guide"); // Added state for build target
   const [deckStatus, setDeckStatus] = useState<"idle" | "generating" | "ready" | "error">("idle");
   const [deckDownloadUrl, setDeckDownloadUrl] = useState<string>("");
-  const [deckLanguage, setDeckLanguage] = useState<string>("English");
+
   const { toast } = useToast();
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -162,15 +162,15 @@ const UploadSection = () => {
   const handleCreateDeck = async (id: string) => {
     setDeckStatus("generating");
     try {
-      const language = deckLanguage || "English";
-      const response = await createPresentation(id, language);
+      // Let the backend handle language detection using the same logic as process_endpoint
+      const response = await createPresentation(id, prompt);
       setDeckDownloadUrl(response.download_url);
       setDeckStatus("ready");
       toast({
         title: "Deck generated!",
         description: "You can now download your presentation deck.",
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       setDeckStatus("error");
       toast({
         title: "Deck generation failed",
@@ -179,6 +179,8 @@ const UploadSection = () => {
       });
     }
   };
+
+
 
   // Placeholder for screen recording logic
   const handleScreenRecord = async () => {
@@ -396,45 +398,29 @@ const UploadSection = () => {
                   </Button>
                   
                   {!videoId ? (
-                    <Button 
-                      onClick={handleUpload}
-                      disabled={isUploading}
-                      className="flex items-center gap-2"
-                    >
-                      {isUploading ? (
-                        <>
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          Uploading...
-                        </>
-                      ) : (
-                        <>
-                          <Upload className="h-4 w-4" />
-                          Upload & Process
-                        </>
-                      )}
-                    </Button>
+                    <>
+
+                      <Button 
+                        onClick={handleUpload}
+                        disabled={isUploading}
+                        className="flex items-center gap-2"
+                      >
+                        {isUploading ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Uploading...
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="h-4 w-4" />
+                            Upload & Process
+                          </>
+                        )}
+                      </Button>
+                    </>
                   ) : processingStatus === "done" && buildTarget === "deck" ? (
                     <div className="flex flex-col items-center gap-4">
                       <div className="w-full flex flex-col sm:flex-row items-center gap-2">
-                        <Label htmlFor="deck-language" className="text-sm font-medium">Deck Language:</Label>
-                        <Select
-                          value={deckLanguage}
-                          onValueChange={setDeckLanguage}
-                          id="deck-language"
-                        >
-                          <SelectTrigger className="w-48">
-                            <SelectValue placeholder="Language" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="English">English</SelectItem>
-                            <SelectItem value="Spanish">Spanish</SelectItem>
-                            <SelectItem value="French">French</SelectItem>
-                            <SelectItem value="German">German</SelectItem>
-                            <SelectItem value="Chinese">Chinese</SelectItem>
-                            <SelectItem value="Japanese">Japanese</SelectItem>
-                            <SelectItem value="Other">Other</SelectItem>
-                          </SelectContent>
-                        </Select>
                         <Button
                           className="flex items-center gap-2"
                           onClick={() => handleCreateDeck(videoId!)}
