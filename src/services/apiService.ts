@@ -92,6 +92,35 @@ export const uploadVideo = async (file: File): Promise<UploadResponse> => {
 };
 
 /**
+ * Start a screen recording (video + audio + camera overlay)
+ */
+export const startScreenRecord = async (duration: number = 15): Promise<{status: string; recording_id: string; output_path: string}> => {
+  const response = await fetch(`${API_BASE_URL}/screen_record`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ duration }),
+  });
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Screen record start failed: ${errorText}`);
+  }
+  return await response.json();
+};
+
+/**
+ * Stop the ongoing screen recording
+ */
+export const stopScreenRecord = async (): Promise<{status: string; output_path: string}> => {
+  const response = await fetch(`${API_BASE_URL}/screen_record/stop`, {
+    method: "POST" });
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Screen record stop failed: ${errorText}`);
+  }
+  return await response.json();
+};
+
+/**
  * Start processing a previously uploaded video
  */
 export const processVideo = async (
