@@ -1,4 +1,3 @@
-
 /**
  * Service for communicating with the Python documentation generation API
  */
@@ -97,11 +96,21 @@ export const uploadVideo = async (file: File): Promise<UploadResponse> => {
 export const processVideo = async (
   videoId: string, 
   prompt?: string, 
-  persona?: string
+  persona?: string,
+  companyWebsite?: string,
+  language?: string  // Add language parameter
 ): Promise<ProcessResponse> => {
-  const body: { prompt?: string; persona?: string } = {};
+  const body: { 
+    prompt?: string; 
+    persona?: string;
+    companyWebsite?: string;
+    language?: string;  // Add to request body
+  } = {};
+  
   if (prompt) body.prompt = prompt;
   if (persona) body.persona = persona;
+  if (companyWebsite) body.companyWebsite = companyWebsite;
+  if (language) body.language = language;  // Include language in body
 
   const response = await fetch(`${API_BASE_URL}/process/${videoId}`, {
     method: "POST",
