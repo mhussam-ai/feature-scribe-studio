@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group" // Added import
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/components/ui/use-toast";
 import { Upload, FileText, Image, Loader2, Download } from "lucide-react";
 import {
@@ -34,10 +33,10 @@ const UploadSection = () => {
   const [persona, setPersona] = useState<string>("");
   const [companyWebsite, setCompanyWebsite] = useState<string>("");
   const [isRecording, setIsRecording] = useState(false);
-  const [buildTarget, setBuildTarget] = useState<"user guide" | "deck">("user guide"); // Added state for build target
+  const [buildTarget, setBuildTarget] = useState<"user guide" | "deck">("user guide");
   const [deckStatus, setDeckStatus] = useState<"idle" | "generating" | "ready" | "error">("idle");
   const [deckDownloadUrl, setDeckDownloadUrl] = useState<string>("");
-
+  const [deckLanguage, setDeckLanguage] = useState<string>("English");
   const { toast } = useToast();
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -60,7 +59,6 @@ const UploadSection = () => {
   };
 
   const handleFile = (file: File) => {
-    // Check file type
     if (file.type.startsWith("video/")) {
       setUploadType("video");
       setFile(file);
@@ -80,30 +78,33 @@ const UploadSection = () => {
     if (!file) return;
     
     setIsUploading(true);
-      setProcessingStatus("");
+    setProcessingStatus("");
 
-      try {
-        // TODO: Pass prompt, persona, company website, and buildTarget to the backend
-        console.log("Build Target:", buildTarget); // Log the selected build target
-        console.log("Prompt:", prompt);
-        console.log("Persona:", persona);
-        console.log("Company Website:", companyWebsite);
+    try {
+      console.log("Build Target:", buildTarget);
+      console.log("Prompt:", prompt);
+      console.log("Persona:", persona);
+      console.log("Company Website:", companyWebsite);
+      console.log("Language:", deckLanguage);
 
-        // Upload the file
-        const uploadResponse = await uploadVideo(file); // Modify API call if needed
-        setVideoId(uploadResponse.video_id);
-        setProcessingStatus("uploaded");
+      const uploadResponse = await uploadVideo(file);
+      setVideoId(uploadResponse.video_id);
+      setProcessingStatus("uploaded");
 
-        toast({
-          title: "Upload successful!",
-          description: "Starting document generation process...",
-        });
+      toast({
+        title: "Upload successful!",
+        description: "Starting document generation process...",
+      });
 
-        // Start processing
-        await processVideo(uploadResponse.video_id, prompt, persona); // Modify API call if needed
+      await processVideo(
+        uploadResponse.video_id, 
+        prompt, 
+        persona, 
+        companyWebsite,
+        deckLanguage
+      );
 
-        // Begin polling for status
-        checkProcessingStatus(uploadResponse.video_id);
+      checkProcessingStatus(uploadResponse.video_id);
       
     } catch (error) {
       console.error("Upload error:", error);
@@ -123,10 +124,8 @@ const UploadSection = () => {
       
       if (statusResponse.status !== "done" && 
           !statusResponse.status.startsWith("error")) {
-        // Continue polling every 3 seconds until done or error
         setTimeout(() => checkProcessingStatus(id), 3000);
       } else if (statusResponse.status === "done" && buildTarget === "deck" && deckStatus === "idle") {
-        // Automatically trigger deck generation if needed
         await handleCreateDeck(id);
       } else if (statusResponse.status === "done") {
         toast({
@@ -158,19 +157,18 @@ const UploadSection = () => {
     setProcessingStatus("");
   };
 
-  // Create deck presentation for a video
   const handleCreateDeck = async (id: string) => {
     setDeckStatus("generating");
     try {
-      // Let the backend handle language detection using the same logic as process_endpoint
-      const response = await createPresentation(id, prompt);
+      const language = deckLanguage || "English";
+      const response = await createPresentation(id, language);
       setDeckDownloadUrl(response.download_url);
       setDeckStatus("ready");
       toast({
         title: "Deck generated!",
         description: "You can now download your presentation deck.",
       });
-    } catch (error: unknown) {
+    } catch (error: any) {
       setDeckStatus("error");
       toast({
         title: "Deck generation failed",
@@ -180,30 +178,14 @@ const UploadSection = () => {
     }
   };
 
-
-
-  // Placeholder for screen recording logic
   const handleScreenRecord = async () => {
     setIsRecording(true);
     toast({
       title: "Screen Recording",
       description: "Screen recording functionality not yet implemented.",
     });
-    // TODO: Implement screen recording using navigator.mediaDevices.getDisplayMedia
-    // and MediaRecorder API
     console.log("Attempting to start screen recording...");
-    // Example structure:
-    // try {
-    //   const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
-    //   // ... use MediaRecorder to record the stream ...
-    //   // ... on stop, create a File object and call handleFile(recordedFile) ...
-    // } catch (err) {
-    //   console.error("Screen recording error:", err);
-    //   toast({ title: "Screen Recording Failed", description: err.message, variant: "destructive" });
-    // } finally {
-    //   setIsRecording(false);
-    // }
-    setIsRecording(false); // Remove this line once implemented
+    setIsRecording(false);
   };
 
   return (
@@ -217,7 +199,6 @@ const UploadSection = () => {
         </div>
 
         <div className="max-w-3xl mx-auto">
-          {/* Build Target Selection */}
           <div className="mb-8 p-6 bg-white rounded-xl shadow-sm border border-gray-200">
             <Label className="text-xl font-semibold mb-6 block text-center text-gray-800">What do you want to build?</Label>
             <RadioGroup
@@ -226,7 +207,6 @@ const UploadSection = () => {
               value={buildTarget}
               onValueChange={(value: "user guide" | "deck") => setBuildTarget(value)}
             >
-              {/* User Guide Option - Corrected Label structure */}
               <Label htmlFor="r1" className={`flex flex-col items-center p-6 border rounded-lg cursor-pointer transition-all ${buildTarget === 'user guide' ? 'bg-blue-50 border-blue-300 ring-2 ring-blue-200' : 'hover:bg-gray-50 border-gray-200'}`}>
                 <div className="flex items-center w-full justify-between mb-2">
                   <span className="font-medium text-lg text-gray-700">Build a User Guide</span>
@@ -234,7 +214,6 @@ const UploadSection = () => {
                 </div>
                 <p className="text-sm text-gray-500 text-center w-full">Generate detailed step-by-step documentation and guides.</p>
               </Label>
-              {/* Deck Option - Corrected Label structure */}
               <Label htmlFor="r2" className={`flex flex-col items-center p-6 border rounded-lg cursor-pointer transition-all ${buildTarget === 'deck' ? 'bg-blue-50 border-blue-300 ring-2 ring-blue-200' : 'hover:bg-gray-50 border-gray-200'}`}>
                 <div className="flex items-center w-full justify-between mb-2">
                   <span className="font-medium text-lg text-gray-700">Build a Customer Deck</span>
@@ -242,10 +221,9 @@ const UploadSection = () => {
                 </div>
                 <p className="text-sm text-gray-500 text-center w-full">Create presentation slides summarizing key features or flows.</p>
               </Label>
-            </RadioGroup> {/* Correctly closed RadioGroup */}
+            </RadioGroup>
           </div>
 
-          {/* File Upload Area */}
           <div
             className={`
               border-2 border-dashed rounded-xl p-10 
@@ -256,7 +234,6 @@ const UploadSection = () => {
             onDrop={handleDrop}
           >
             {!file ? (
-              // Initial Upload View - Corrected structure and styling
               <div className="text-center">
                 <div className="flex justify-center mb-6">
                   <div className="bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full p-4 shadow-sm">
@@ -268,7 +245,7 @@ const UploadSection = () => {
                 <div className="flex flex-col sm:flex-row justify-center gap-4 mb-8">
                   <Button
                     variant="outline"
-                    className="flex items-center gap-2 py-2 px-4 text-base hover:bg-gray-50" // Added hover effect
+                    className="flex items-center gap-2 py-2 px-4 text-base hover:bg-gray-50"
                     onClick={() => document.getElementById('videoInput')?.click()}
                   >
                     <FileText className="h-5 w-5" />
@@ -276,7 +253,7 @@ const UploadSection = () => {
                   </Button>
                   <Button
                     variant="outline"
-                    className="flex items-center gap-2 py-2 px-4 text-base hover:bg-gray-50" // Added hover effect
+                    className="flex items-center gap-2 py-2 px-4 text-base hover:bg-gray-50"
                     onClick={() => document.getElementById('imageInput')?.click()}
                   >
                     <Image className="h-5 w-5" />
@@ -284,7 +261,7 @@ const UploadSection = () => {
                   </Button>
                   <Button
                     variant="outline"
-                    className="flex items-center gap-2 py-2 px-4 text-base hover:bg-gray-50" // Added hover effect
+                    className="flex items-center gap-2 py-2 px-4 text-base hover:bg-gray-50"
                     onClick={handleScreenRecord}
                     disabled={isRecording}
                   >
@@ -314,22 +291,20 @@ const UploadSection = () => {
                 </p>
               </div>
             ) : (
-              // File Selected View - Corrected structure and styling
               <div className="text-center py-6">
-                <div className="flex justify-center mb-6"> {/* Increased margin */}
+                <div className="flex justify-center mb-6">
                   {uploadType === "video" ? (
                     <FileText className="h-16 w-16 text-blue-600" />
                   ) : (
                     <Image className="h-16 w-16 text-blue-600" />
                   )}
                 </div>
-                <h3 className="text-xl font-semibold mb-2 text-gray-800">{file.name}</h3> {/* Increased bottom margin */}
-                <p className="text-gray-600 mb-6"> {/* Increased bottom margin */}
+                <h3 className="text-xl font-semibold mb-2 text-gray-800">{file.name}</h3>
+                <p className="text-gray-600 mb-6">
                   {(file.size / 1024 / 1024).toFixed(2)} MB
                 </p>
 
-                {/* Form Fields */}
-                <div className="mt-6 mb-6 text-left max-w-md mx-auto space-y-4"> {/* Adjusted margin */}
+                <div className="mt-6 mb-6 text-left max-w-md mx-auto space-y-4">
                   <div>
                     <Label htmlFor="prompt" className="text-sm font-medium text-gray-700">
                       Prompt (Optional)
@@ -341,7 +316,7 @@ const UploadSection = () => {
                       value={prompt}
                       onChange={(e) => setPrompt(e.target.value)}
                       className="mt-1"
-                      disabled={isUploading || (!!videoId && processingStatus !== "" && !processingStatus.startsWith("error"))} // Disable after upload starts
+                      disabled={isUploading || (!!videoId && processingStatus !== "" && !processingStatus.startsWith("error"))}
                     />
                   </div>
 
@@ -352,7 +327,7 @@ const UploadSection = () => {
                     <Select 
                       value={persona} 
                       onValueChange={setPersona}
-                      disabled={isUploading || (!!videoId && processingStatus !== "" && !processingStatus.startsWith("error"))} // Disable after upload starts
+                      disabled={isUploading || (!!videoId && processingStatus !== "" && !processingStatus.startsWith("error"))}
                     >
                       <SelectTrigger id="persona" className="mt-1">
                         <SelectValue placeholder="Select a persona" />
@@ -368,6 +343,30 @@ const UploadSection = () => {
                   </div>
 
                   <div>
+                    <Label htmlFor="deck-language" className="text-sm font-medium text-gray-700">
+                      Document Language
+                    </Label>
+                    <Select 
+                      value={deckLanguage} 
+                      onValueChange={setDeckLanguage}
+                      disabled={isUploading || (!!videoId && processingStatus !== "" && !processingStatus.startsWith("error"))}
+                    >
+                      <SelectTrigger id="deck-language" className="mt-1">
+                        <SelectValue placeholder="Select language" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="English">English</SelectItem>
+                        <SelectItem value="Spanish">Spanish</SelectItem>
+                        <SelectItem value="French">French</SelectItem>
+                        <SelectItem value="German">German</SelectItem>
+                        <SelectItem value="Chinese">Chinese</SelectItem>
+                        <SelectItem value="Japanese">Japanese</SelectItem>
+                        <SelectItem value="Other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
                     <Label htmlFor="companyWebsite" className="text-sm font-medium text-gray-700">
                       Company Website URL (Optional)
                     </Label>
@@ -378,16 +377,17 @@ const UploadSection = () => {
                       value={companyWebsite}
                       onChange={(e) => setCompanyWebsite(e.target.value)}
                       className="mt-1"
-                      disabled={isUploading || (!!videoId && processingStatus !== "" && !processingStatus.startsWith("error"))} // Disable after upload starts
+                      disabled={isUploading || (!!videoId && processingStatus !== "" && !processingStatus.startsWith("error"))}
                     />
                   </div>
+
+                  
                 </div>
                 
                 {videoId && processingStatus && (
                   <ProcessingStatus status={processingStatus} />
                 )}
                 
-                {/* Action Buttons - Appear after file selection and form fields */}
                 <div className="flex justify-center gap-4 mt-6">
                   <Button 
                     variant="outline"
@@ -398,47 +398,82 @@ const UploadSection = () => {
                   </Button>
                   
                   {!videoId ? (
-                    <>
-
-                      <Button 
-                        onClick={handleUpload}
-                        disabled={isUploading}
-                        className="flex items-center gap-2"
-                      >
-                        {isUploading ? (
-                          <>
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                            Uploading...
-                          </>
-                        ) : (
-                          <>
-                            <Upload className="h-4 w-4" />
-                            Upload & Process
-                          </>
-                        )}
-                      </Button>
-                    </>
+                    <Button 
+                      onClick={handleUpload}
+                      disabled={isUploading}
+                      className="flex items-center gap-2"
+                    >
+                      {isUploading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Uploading...
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="h-4 w-4" />
+                          Upload & Process
+                        </>
+                      )}
+                    </Button>
                   ) : processingStatus === "done" && buildTarget === "deck" ? (
                     <div className="flex flex-col items-center gap-4">
                       <div className="w-full flex flex-col sm:flex-row items-center gap-2">
-                        <Button
-                          className="flex items-center gap-2"
-                          onClick={() => handleCreateDeck(videoId!)}
-                          disabled={deckStatus === "generating"}
+                        <Label htmlFor="deck-language" className="text-sm font-medium">Deck Language:</Label>
+                        <Select
+                          value={deckLanguage}
+                          onValueChange={setDeckLanguage}
                         >
-                          {deckStatus === "generating" ? (
-                            <>
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                              Generating Deck...
-                            </>
-                          ) : (
-                            <>
-                              <Download className="h-4 w-4" />
-                              Generate Deck
-                            </>
-                          )}
-                        </Button>
+                          <SelectTrigger id="deck-language" className="w-48">
+                            <SelectValue placeholder="Language" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="English">English</SelectItem>
+                            <SelectItem value="Spanish">Spanish</SelectItem>
+                            <SelectItem value="French">French</SelectItem>
+                            <SelectItem value="German">German</SelectItem>
+                            <SelectItem value="Chinese">Chinese</SelectItem>
+                            <SelectItem value="Japanese">Japanese</SelectItem>
+                            <SelectItem value="Other">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
+                      <div className="w-full flex flex-col sm:flex-row items-center gap-2">
+                        <Label htmlFor="deck-language" className="text-sm font-medium">Deck Language:</Label>
+                        <Select
+                          value={deckLanguage}
+                          onValueChange={setDeckLanguage}
+                        >
+                          <SelectTrigger id="deck-language" className="w-48">
+                            <SelectValue placeholder="Language" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="English">English</SelectItem>
+                            <SelectItem value="Spanish">Spanish</SelectItem>
+                            <SelectItem value="French">French</SelectItem>
+                            <SelectItem value="German">German</SelectItem>
+                            <SelectItem value="Chinese">Chinese</SelectItem>
+                            <SelectItem value="Japanese">Japanese</SelectItem>
+                            <SelectItem value="Other">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <Button
+                        className="flex items-center gap-2"
+                        onClick={() => handleCreateDeck(videoId!)}
+                        disabled={deckStatus === "generating"}
+                      >
+                        {deckStatus === "generating" ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Generating Deck...
+                          </>
+                        ) : (
+                          <>
+                            <Download className="h-4 w-4" />
+                            Generate Deck
+                          </>
+                        )}
+                      </Button>
                       {deckStatus === "ready" && (
                         <Button
                           className="flex items-center gap-2"
@@ -534,7 +569,7 @@ const UploadSection = () => {
           </div>
         </div>
       </div>
-    </section> // Correctly closed section
+    </section>
   );
 };
 
